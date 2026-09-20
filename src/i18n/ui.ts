@@ -15,7 +15,7 @@ const dictionary = {
     'contact.heading': 'Contact',
     'contact.instagram': 'instagram',
     'contact.copied': 'コピーしました',
-    'about.name': '小林　克彰',
+    'about.name': '小林 克彰',
     /* 改行位置は指示どおり固定（\n で明示的な改行を表す） */
     'about.paragraph1': [
       '1997年福井県生まれ。',
