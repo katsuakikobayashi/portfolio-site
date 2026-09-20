@@ -1,0 +1,37 @@
+---
+import { HTML_LANG, LOCALE_LABELS, LOCALES, type Locale } from '@/i18n/config'
+import { getAlternatePath } from '@/i18n/utils'
+import { useTranslations } from '@/i18n/ui'
+
+interface Props {
+  locale: Locale
+  pathname: string
+  class?: string
+}
+
+const { locale, pathname, class: className } = Astro.props
+const t = useTranslations(locale)
+---
+
+<nav class:list={['p-lang-switch', className]} aria-label={t('a11y.languageNav')}>
+  <ul class="p-lang-switch__list">
+    {LOCALES.map((target) => (
+      <li class="p-lang-switch__item">
+        {target === locale ? (
+          <span class="p-lang-switch__link p-lang-switch__link--current" aria-current="true">
+            {LOCALE_LABELS[target]}
+          </span>
+        ) : (
+          <a
+            class="p-lang-switch__link"
+            href={getAlternatePath(pathname, target)}
+            hreflang={HTML_LANG[target]}
+            lang={HTML_LANG[target]}
+          >
+            {LOCALE_LABELS[target]}
+          </a>
+        )}
+      </li>
+    ))}
+  </ul>
+</nav>

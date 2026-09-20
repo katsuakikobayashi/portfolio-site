@@ -1,0 +1,48 @@
+---
+import EmailLink from '@/components/EmailLink.astro'
+import LangSwitch from '@/components/LangSwitch.astro'
+import { SITE } from '@/data/site'
+import type { Locale } from '@/i18n/config'
+import { useTranslations } from '@/i18n/ui'
+import { localizePath } from '@/i18n/utils'
+
+interface Props {
+  locale: Locale
+  pathname: string
+}
+
+const { locale, pathname } = Astro.props
+const t = useTranslations(locale)
+const aboutPath = localizePath('about', locale)
+---
+
+<main class="l-page__main p-top">
+  <h1 class="p-top__name">{SITE.name}</h1>
+
+  <section class="p-top__block p-top__block--profile">
+    <h2 class="p-top__heading">{t('top.role')}</h2>
+    <p class="p-top__disciplines">{t('top.disciplines')}</p>
+  </section>
+
+  <nav class="p-top__block p-top__block--nav" aria-label={t('a11y.pageNav')}>
+    <a class="c-link p-top__nav-link" href={aboutPath}>
+      {t('nav.about')}
+    </a>
+  </nav>
+
+  <section class="p-top__block p-top__block--contact">
+    <h2 class="p-top__heading">{t('contact.heading')}</h2>
+    <ul class="p-top__contact-list">
+      <li>
+        <EmailLink email={SITE.email} copiedLabel={t('contact.copied')} />
+      </li>
+      <li>
+        <a class="c-link" href={SITE.instagramUrl} target="_blank" rel="noopener noreferrer">
+          {t('contact.instagram')}
+        </a>
+      </li>
+    </ul>
+  </section>
+
+  <LangSwitch class="p-top__block p-top__block--language" locale={locale} pathname={pathname} />
+</main>

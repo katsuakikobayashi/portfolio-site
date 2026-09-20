@@ -1,0 +1,19 @@
+---
+import AboutView from '@/components/AboutView.astro'
+import SiteFooter from '@/components/SiteFooter.astro'
+import type { Locale } from '@/i18n/config'
+import { useTranslations } from '@/i18n/ui'
+import BaseLayout from '@/layouts/BaseLayout.astro'
+
+const locale: Locale = 'en'
+const t = useTranslations(locale)
+---
+
+<BaseLayout
+  locale={locale}
+  title={`${t('nav.about')} | ${t('meta.title')}`}
+  description={t('about.paragraph1')}
+>
+  <AboutView locale={locale} pathname={Astro.url.pathname} />
+  <SiteFooter />
+</BaseLayout>

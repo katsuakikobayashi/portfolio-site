@@ -1,0 +1,41 @@
+/**
+ * Layout 層: 位置と空間だけを制御する。色・フォントには触れない。
+ */
+@layer layout {
+  /*
+   * ページ全体の枠。
+   * main と footer を同じ 1 セル（ビューポート全高）に重ねて配置し、
+   * main はそのセル内で縦方向中央、footer は下端に独立して揃える。
+   * こうすることで footer の有無・高さに関わらず、メインコンテンツは
+   * 常にブラウザの高さそのものに対して中央になる。
+   */
+  .l-page {
+    display: grid;
+    grid-template-rows: 1fr;
+    min-block-size: 100svh;
+    padding-inline: var(--page-inline);
+  }
+
+  .l-page__main {
+    grid-area: 1 / 1;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    justify-content: center;
+    /* 極端に低い画面でコンテンツが端に張り付かないための最小余白 */
+    padding-block: var(--page-block-safe);
+  }
+
+  .l-page__footer {
+    grid-area: 1 / 1;
+    align-self: end;
+    padding-block-end: var(--page-block-end);
+  }
+
+  /* 縦方向にブロックを積み上げる際の共通コンテナ */
+  .l-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+  }
+}

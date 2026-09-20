@@ -1,0 +1,30 @@
+/**
+ * Animation 層: モーション設計と prefers-reduced-motion への対応を一元管理する。
+ */
+@layer animation {
+  :root {
+    --ease-out-cubic: cubic-bezier(0.33, 1, 0.68, 1);
+    --duration-fast: 0.15s;
+    --duration-normal: 0.3s;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :root {
+      --duration-fast: 0.01ms;
+      --duration-normal: 0.01ms;
+    }
+
+    :where(html) {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

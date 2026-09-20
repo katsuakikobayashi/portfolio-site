@@ -1,0 +1,40 @@
+---
+import type { Locale } from '@/i18n/config'
+import { useTranslations } from '@/i18n/ui'
+
+/**
+ * About 本文（氏名見出し + 段落）。
+ * 改行位置は指示のとおり固定するため、辞書側の `\n` で明示的に改行し、
+ * ブラウザ幅による自動折り返しには委ねない。
+ */
+interface Props {
+  locale: Locale
+}
+
+const { locale } = Astro.props
+const t = useTranslations(locale)
+const paragraph1Lines = t('about.paragraph1').split('\n')
+const paragraph2Lines = t('about.paragraph2')
+  .split('\n')
+  .filter((line) => line.length > 0)
+---
+
+<h1 class:list={['p-about__name', locale === 'ja' && 'p-about__name--ja']}>{t('about.name')}</h1>
+<p class="p-about__paragraph">
+  {paragraph1Lines.map((line, i) => (
+    <Fragment>
+      {i > 0 && <br />}
+      {line}
+    </Fragment>
+  ))}
+</p>
+{paragraph2Lines.length > 0 && (
+  <p class="p-about__paragraph">
+    {paragraph2Lines.map((line, i) => (
+      <Fragment>
+        {i > 0 && <br />}
+        {line}
+      </Fragment>
+    ))}
+  </p>
+)}

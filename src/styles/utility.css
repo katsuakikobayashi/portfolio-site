@@ -1,0 +1,17 @@
+/**
+ * Utility 層: 他のすべての層を確実に上書きする必要があるクラス。
+ * !important の使用はこの層に限って認める。
+ */
+@layer utility {
+  .u-visually-hidden {
+    position: absolute !important;
+    inline-size: 1px !important;
+    block-size: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip-path: inset(50%) !important;
+    white-space: nowrap !important;
+    border-width: 0 !important;
+  }
+}

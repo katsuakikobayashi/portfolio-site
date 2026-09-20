@@ -1,0 +1,126 @@
+/**
+ * Project 層: About ページ固有のスタイル。
+ *
+ * PC（docs/design/about-pc.png）と SP（docs/design/about-sp.png）は
+ * 肩書き・Contact セクションの有無が異なる別構成のデザインのため、
+ * サイト全体で唯一この 1 箇所に限りメディアクエリを置き、
+ * `.p-about__grid--pc` / `.p-about__grid--sp` の表示を切り替える
+ * （mFLOCSS の PC/SP 別 DOM 分岐ルール）。
+ */
+@layer project {
+  /* モバイルファースト: 既定は SP 構成を表示し、PC 構成は隠す */
+  .p-about__grid--pc {
+    display: none;
+  }
+
+  .p-about__grid--sp {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+  }
+
+  @media (min-width: 768px) {
+    .p-about__grid--pc {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      column-gap: var(--spacing-lg);
+      align-items: start;
+    }
+
+    .p-about__grid--sp {
+      display: none;
+    }
+  }
+
+  /* ---------------------------------------------------------------
+   * PC: 左に TOP 情報の再掲（淡色）、右に本文の 2 カラム構成
+   * ------------------------------------------------------------- */
+
+  .p-about__recap {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    /* TOP 情報の再掲であることを示す淡色。リンクも文脈色を継承させる */
+    color: var(--color-text-muted);
+  }
+
+  .p-about__recap .c-link {
+    color: inherit;
+  }
+
+  .p-about__breadcrumb {
+    display: flex;
+    align-items: baseline;
+    /* パンくずは現在地を示すナビゲーションなので、再掲ブロックとは独立して黒 */
+    color: var(--color-text);
+  }
+
+  .p-about__breadcrumb-sep {
+    margin-inline: 0.4em;
+  }
+
+  .p-about__content {
+    /* 右カラムの先頭を、左カラムのパンくず行と縦位置で揃える。
+       名前 + 見出し + 肩書きぶんの高さを、実寸ではなく既存トークンの
+       合算で表現し、フォントサイズ変更にも追従できるようにしている。 */
+    margin-block-start: calc(
+      var(--font-size-title) + var(--spacing-md) + var(--font-size-label) + var(--spacing-xs) +
+        var(--font-size-body) + var(--spacing-lg)
+    );
+    /* グリッドの 1fr トラック幅（ページ右余白まで）をそのまま使う */
+    max-inline-size: none;
+  }
+
+  /* ---------------------------------------------------------------
+   * SP: 戻るリンク → 本文 → 言語切り替えの 1 カラム構成
+   * ------------------------------------------------------------- */
+  .p-about__back {
+    line-height: var(--line-height-single);
+  }
+
+  .p-about__back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    font-size: var(--font-size-label);
+    letter-spacing: var(--letter-spacing-label);
+  }
+
+  .p-about__back-arrow {
+    text-decoration: none;
+  }
+
+  .p-about__grid--sp .p-about__content {
+    margin-block-start: var(--spacing-2lg);
+  }
+
+  .p-about__language-sp {
+    margin-block-start: var(--spacing-2lg);
+  }
+
+  /* ---------------------------------------------------------------
+   * 共通: 氏名見出しと本文
+   * ------------------------------------------------------------- */
+  .p-about__name {
+    font-size: var(--font-size-title);
+    letter-spacing: var(--letter-spacing-title);
+    line-height: var(--line-height-single);
+  }
+
+  /* 氏名「小林　克彰」のみ指定のカーニング（0.56em）を適用する */
+  .p-about__name--ja {
+    letter-spacing: 0.56em;
+  }
+
+  .p-about__paragraph {
+    margin-block-start: var(--spacing-sm);
+    font-size: var(--font-size-body);
+    letter-spacing: var(--letter-spacing-body);
+    line-height: var(--line-height-prose);
+  }
+
+  .p-about__paragraph + .p-about__paragraph {
+    /* 空行 1 行ぶんの段落間隔 */
+    margin-block-start: 1lh;
+  }
+}

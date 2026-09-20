@@ -1,0 +1,92 @@
+---
+import AboutContent from '@/components/AboutContent.astro'
+import EmailLink from '@/components/EmailLink.astro'
+import LangSwitch from '@/components/LangSwitch.astro'
+import { SITE } from '@/data/site'
+import type { Locale } from '@/i18n/config'
+import { useTranslations } from '@/i18n/ui'
+import { localizePath } from '@/i18n/utils'
+
+/**
+ * About ページ本体。
+ *
+ * デザインカンプ（docs/design/about-pc.png / about-sp.png）は PC と SP で
+ * 見出し・肩書き・Contact セクションの有無が異なる別構成のため、
+ * mFLOCSS の PC/SP 別 DOM 分岐ルールに従い `__pc` / `__sp` の対となる
+ * 2 つの DOM をそれぞれ用意し、CSS（about.css）側の 1 箇所のみに置く
+ * メディアクエリで表示を切り替える。
+ */
+interface Props {
+  locale: Locale
+  pathname: string
+}
+
+const { locale, pathname } = Astro.props
+const t = useTranslations(locale)
+const topPath = localizePath('', locale)
+---
+
+<main class="l-page__main p-about">
+  <div class="p-about__grid p-about__grid--pc">
+    <div class="p-about__recap">
+      <p class="p-top__name p-about__recap-name">{SITE.name}</p>
+
+      <div class="p-top__block p-top__block--profile">
+        <h2 class="p-top__heading">{t('top.role')}</h2>
+        <p class="p-top__disciplines">{t('top.disciplines')}</p>
+      </div>
+
+      <nav
+        class="p-top__block p-top__block--nav p-about__breadcrumb"
+        aria-label={t('a11y.pageNav')}
+      >
+        <a class="c-link p-top__nav-link" href={topPath}>
+          {t('nav.home')}
+        </a>
+        <span class="p-about__breadcrumb-sep" aria-hidden="true">
+          /
+        </span>
+        <span class="p-top__nav-link" aria-current="page">
+          {t('nav.about')}
+        </span>
+      </nav>
+
+      <section class="p-top__block p-top__block--contact">
+        <h2 class="p-top__heading">{t('contact.heading')}</h2>
+        <ul class="p-top__contact-list">
+          <li>
+            <EmailLink email={SITE.email} copiedLabel={t('contact.copied')} />
+          </li>
+          <li>
+            <a class="c-link" href={SITE.instagramUrl} target="_blank" rel="noopener noreferrer">
+              {t('contact.instagram')}
+            </a>
+          </li>
+        </ul>
+      </section>
+
+      <LangSwitch class="p-top__block p-top__block--language" locale={locale} pathname={pathname} />
+    </div>
+
+    <div class="p-about__content">
+      <AboutContent locale={locale} />
+    </div>
+  </div>
+
+  <div class="p-about__grid p-about__grid--sp">
+    <nav class="p-about__back" aria-label={t('a11y.pageNav')}>
+      <a class="c-link p-about__back-link" href={topPath}>
+        <span class="p-about__back-arrow" aria-hidden="true">
+          ←
+        </span>
+        {t('nav.home')}
+      </a>
+    </nav>
+
+    <div class="p-about__content">
+      <AboutContent locale={locale} />
+    </div>
+
+    <LangSwitch class="p-about__language-sp" locale={locale} pathname={pathname} />
+  </div>
+</main>

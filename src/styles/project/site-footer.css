@@ -1,0 +1,11 @@
+/**
+ * Project 層: サイト共通フッター。
+ */
+@layer project {
+  .p-site-footer__copyright {
+    font-size: var(--font-size-fine);
+    letter-spacing: var(--letter-spacing-fine);
+    line-height: var(--line-height-single);
+    color: var(--color-text-muted);
+  }
+}

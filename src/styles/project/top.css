@@ -1,0 +1,56 @@
+/**
+ * Project 層: TOP ページ固有のスタイル。
+ */
+@layer project {
+  .p-top__name {
+    font-size: var(--font-size-title);
+    letter-spacing: var(--letter-spacing-title);
+    line-height: var(--line-height-single);
+  }
+
+  .p-top__heading {
+    font-size: var(--font-size-label);
+    letter-spacing: var(--letter-spacing-label);
+    line-height: var(--line-height-single);
+  }
+
+  .p-top__disciplines {
+    margin-block-start: var(--spacing-xs);
+    font-size: var(--font-size-body);
+    letter-spacing: var(--letter-spacing-body);
+    line-height: var(--line-height-single);
+  }
+
+  /* タイトル直下のプロフィールブロックのみ他より詰める */
+  .p-top__block--profile {
+    margin-block-start: var(--spacing-md);
+  }
+
+  .p-top__block--nav,
+  .p-top__block--contact,
+  .p-top__block--language {
+    margin-block-start: var(--spacing-lg);
+  }
+
+  /* インライン要素のストラット由来の余剰行間を除き、余白をトークンだけで決める */
+  .p-top__block--nav {
+    line-height: var(--line-height-single);
+  }
+
+  .p-top__nav-link {
+    font-size: var(--font-size-label);
+    letter-spacing: var(--letter-spacing-label);
+    line-height: var(--line-height-single);
+  }
+
+  .p-top__contact-list {
+    margin-block-start: var(--spacing-sm);
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: var(--spacing-2xs);
+    font-size: var(--font-size-body);
+    letter-spacing: var(--letter-spacing-body);
+    line-height: var(--line-height-single);
+  }
+}

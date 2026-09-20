@@ -1,0 +1,11 @@
+---
+import { SITE, formatCopyright } from '@/data/site'
+
+const copyright = formatCopyright(new Date().getFullYear(), SITE.name)
+---
+
+<footer class="l-page__footer p-site-footer">
+  <p class="p-site-footer__copyright">
+    <small>{copyright}</small>
+  </p>
+</footer>

@@ -1,0 +1,17 @@
+/**
+ * mFLOCSS: 8 層アーキテクチャ
+ * セレクタの詳細度ではなく、この宣言順で優先度が確定する。
+ */
+@layer tokens, theme, foundation, layout, component, project, animation, utility;
+
+@import url('./tokens.css');
+@import url('./theme.css');
+@import url('./foundation.css');
+@import url('./layout.css');
+@import url('./component/link.css');
+@import url('./project/top.css');
+@import url('./project/about.css');
+@import url('./project/lang-switch.css');
+@import url('./project/site-footer.css');
+@import url('./animation.css');
+@import url('./utility.css');

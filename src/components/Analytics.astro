@@ -1,0 +1,21 @@
+---
+import { PUBLIC_GTM_ID } from 'astro:env/client'
+
+/**
+ * Google Tag Manager の注入ポイント。
+ * 環境変数 PUBLIC_GTM_ID が設定されている場合のみスクリプトを出力し、
+ * 未設定時は 1 バイトも出力しない（サステナブル Web 要件）。
+ * 読み込みは async 固定で、DOM 構築をブロックしない（要件⑤）。
+ */
+const gtmId = PUBLIC_GTM_ID
+---
+
+{gtmId && (
+  <Fragment>
+    <script is:inline>
+      window.dataLayer = window.dataLayer || []
+      window.dataLayer.push({ 'gtm.start': Date.now(), event: 'gtm.js' })
+    </script>
+    <script is:inline async src={`https://www.googletagmanager.com/gtm.js?id=${gtmId}`}></script>
+  </Fragment>
+)}

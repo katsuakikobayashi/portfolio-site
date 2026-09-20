@@ -1,0 +1,72 @@
+/**
+ * Tokens 層: プリミティブな設計値のみを定義する。
+ * セマンティックな意味付けは Theme 層で行う。
+ */
+
+/* @property は @layer の外に置く必要がある（CSS 仕様の制約） */
+@property --viewport-min {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 393;
+}
+
+@property --viewport-max {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 1440;
+}
+
+@layer tokens {
+  :root {
+    /* ---------------------------------------------------------------
+     * ビューポート基準値（Figma アートボード幅）
+     * ------------------------------------------------------------- */
+    --viewport-min: 393; /* iPhone 16 */
+    --viewport-max: 1440; /* Desktop */
+
+    /* ---------------------------------------------------------------
+     * フルード計算ヘルパー
+     * --fluid は viewport-min で 0px、viewport-max で 1px になる進行度。
+     * `calc(<min> * var(--px) + <delta> * var(--fluid))` の形で使うと、
+     * メディアクエリなしで min → min+delta に滑らかに可変する。
+     * ------------------------------------------------------------- */
+    --px: calc(1rem / 16);
+    --vp-range: calc(var(--viewport-max) - var(--viewport-min));
+    --vp-offset: clamp(
+      0px,
+      calc(100vi - var(--viewport-min) * var(--px)),
+      calc(var(--vp-range) * var(--px))
+    );
+    --fluid: calc(var(--vp-offset) / var(--vp-range));
+
+    /* ---------------------------------------------------------------
+     * 色のプリミティブ値
+     * ------------------------------------------------------------- */
+    --color-black: oklch(0% 0 0); /* #000000 */
+    --color-sand-300: oklch(84.32% 0.0096 106.6); /* #ccccc5 デザイン指定の地色 */
+
+    /* ---------------------------------------------------------------
+     * タイポグラフィのプリミティブ値（min → max: px 相当）
+     * ------------------------------------------------------------- */
+    --size-text-10-12: calc(10 * var(--px) + 2 * var(--fluid));
+    --size-text-11-13: calc(11 * var(--px) + 2 * var(--fluid));
+    --size-text-13-16: calc(13 * var(--px) + 3 * var(--fluid));
+    --size-text-16-20: calc(16 * var(--px) + 4 * var(--fluid));
+
+    /* ---------------------------------------------------------------
+     * スペーシングのプリミティブ値（min → max: px 相当）
+     * ------------------------------------------------------------- */
+    --size-space-10-12: calc(10 * var(--px) + 2 * var(--fluid));
+    --size-space-15-17: calc(15 * var(--px) + 2 * var(--fluid));
+    --size-space-18-21: calc(18 * var(--px) + 3 * var(--fluid));
+    --size-space-45-53: calc(45 * var(--px) + 8 * var(--fluid));
+    --size-space-63-80: calc(63 * var(--px) + 17 * var(--fluid));
+    --size-space-88-100: calc(88 * var(--px) + 12 * var(--fluid));
+    --size-space-28-100: calc(28 * var(--px) + 72 * var(--fluid));
+
+    /* ---------------------------------------------------------------
+     * 線幅
+     * ------------------------------------------------------------- */
+    --size-hairline: max(1px, 0.0625em);
+  }
+}
