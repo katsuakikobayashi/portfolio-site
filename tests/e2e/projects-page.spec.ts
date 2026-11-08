@@ -117,7 +117,26 @@ test.describe('Project 詳細', () => {
     if ((await images.count()) > 1) {
       await expect(images.nth(1)).toHaveAttribute('loading', 'lazy')
     }
-    await expect(page.locator('link[rel="preload"][as="image"]')).toHaveCount(1)
+    await expect(page.locator('picture > source[type="image/avif"]').first()).toHaveAttribute(
+      'srcset',
+      /fm=avif/
+    )
+    const preload = page.locator('link[rel="preload"][as="image"]')
+    await expect(preload).toHaveCount(1)
+    await expect(preload).toHaveAttribute('type', 'image/avif')
+  })
+
+  test('1 枚目の写真は AVIF で読み込まれ、レイアウト上は <img> が直接の配置対象になる', async ({
+    page,
+  }) => {
+    await openFirstProject(page)
+    const image = page.locator('.p-project__image').first()
+    await expect(image).toHaveJSProperty('complete', true)
+    expect(await image.evaluate((img: HTMLImageElement) => img.currentSrc)).toContain('fm=avif')
+    // <picture> は display: contents で箱を作らない（既存の <img> のスタイルをそのまま効かせる）
+    expect(await image.evaluate((img) => getComputedStyle(img.parentElement ?? img).display)).toBe(
+      'contents'
+    )
   })
 
   test('本文の改行は <br> で表現され、HTML としては解釈されない', async ({ page }) => {

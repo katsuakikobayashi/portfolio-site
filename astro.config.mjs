@@ -3,6 +3,7 @@ import { defineConfig, envField, fontProviders } from 'astro/config'
 import { existsSync } from 'node:fs'
 import sitemap from '@astrojs/sitemap'
 import { fetchSiteGlyphs } from './src/lib/font-glyphs.ts'
+import { scriptPriority } from './src/integrations/script-priority.ts'
 
 /**
  * 本番ドメイン。Netlify 側の環境変数 `SITE_URL` で上書き可能。
@@ -85,6 +86,8 @@ export default defineConfig({
     },
   ],
   integrations: [
+    // module script の取得優先度を下げ、クリティカルリクエストチェーンから外す（理由は同ファイル参照）
+    scriptPriority(),
     sitemap({
       i18n: {
         defaultLocale: 'ja',

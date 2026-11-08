@@ -6,7 +6,7 @@ import type { Locale } from '@/i18n/config'
 import { useTranslations } from '@/i18n/ui'
 import BaseLayout from '@/layouts/BaseLayout.astro'
 import { getContent } from '@/lib/microcms'
-import { buildResponsiveImage } from '@/lib/microcms/image'
+import { buildResponsiveImage, getPreferredSource } from '@/lib/microcms/image'
 
 /**
  * TOP ページ（ja / en 共通）。microCMS `top` を取得してビューへ渡す。
@@ -32,7 +32,7 @@ const [firstSlide] = slides
   description={t('meta.description')}
   preloadImage={
     firstSlide && {
-      srcset: firstSlide.srcset,
+      ...getPreferredSource(firstSlide),
       sizes: firstSlide.sizes,
       media: PC_MEDIA_QUERY,
     }

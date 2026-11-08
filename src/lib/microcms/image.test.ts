@@ -3,12 +3,17 @@ import {
   CANDIDATE_WIDTH_STEP,
   DPRS,
   DPR_QUALITY,
+  FALLBACK_FORMAT,
+  IMAGE_FORMATS,
   MAX_CANDIDATE_WIDTH,
   MIN_CANDIDATE_WIDTH,
   buildCandidateWidths,
   buildImageUrl,
   buildResponsiveImage,
+  buildSrcset,
+  getPreferredSource,
   qualityForWidth,
+  SOURCE_FORMATS,
 } from './image'
 
 const SOURCE = 'https://images.microcms-assets.io/assets/abc/def/photo.jpg'
@@ -26,8 +31,8 @@ const parseSrcset = (srcset: string): { url: URL; descriptor: string }[] =>
   })
 
 describe('buildImageUrl', () => {
-  it('WebP・配信幅・画質のパラメータを付与し、dpr は付けない', () => {
-    const url = new URL(buildImageUrl(SOURCE, { width: 720, quality: 60 }))
+  it('フォーマット・配信幅・画質のパラメータを付与し、dpr は付けない', () => {
+    const url = new URL(buildImageUrl(SOURCE, { width: 720, quality: 60, format: 'webp' }))
     expect(url.origin + url.pathname).toBe(SOURCE)
     expect(url.searchParams.get('fm')).toBe('webp')
     expect(url.searchParams.get('w')).toBe('720')
@@ -35,9 +40,16 @@ describe('buildImageUrl', () => {
     expect(url.searchParams.has('dpr')).toBe(false)
   })
 
+  it('AVIF を指定できる', () => {
+    const url = new URL(buildImageUrl(SOURCE, { width: 720, quality: 60, format: 'avif' }))
+    expect(url.searchParams.get('fm')).toBe('avif')
+  })
+
   it('配信幅の端数を丸める', () => {
     expect(
-      new URL(buildImageUrl(SOURCE, { width: 300.4, quality: 80 })).searchParams.get('w')
+      new URL(
+        buildImageUrl(SOURCE, { width: 300.4, quality: 80, format: 'webp' })
+      ).searchParams.get('w')
     ).toBe('300')
   })
 })
@@ -85,8 +97,50 @@ describe('buildCandidateWidths', () => {
   })
 })
 
+describe('buildSrcset', () => {
+  const image = { url: SOURCE, width: 1875, height: 2500 }
+
+  it('全候補を指定フォーマットで配信する', () => {
+    const candidates = parseSrcset(buildSrcset(image, 450, 'avif'))
+    expect(candidates.length).toBe(buildCandidateWidths(image.width).length)
+    candidates.forEach(({ url }) => expect(url.searchParams.get('fm')).toBe('avif'))
+  })
+})
+
 describe('buildResponsiveImage', () => {
   const image = { url: SOURCE, width: 1875, height: 2500 }
+
+  it('優先フォーマット（AVIF）の <source> を優先度順に持つ', () => {
+    const { sources } = buildResponsiveImage(image, 450, '450px')
+    expect(sources.map(({ type }) => type)).toEqual(
+      SOURCE_FORMATS.map((format) => IMAGE_FORMATS[format])
+    )
+    expect(sources.map(({ type }) => type)).toContain('image/avif')
+    sources.forEach(({ srcset }, i) => {
+      const format = SOURCE_FORMATS[i]
+      parseSrcset(srcset).forEach(({ url }) => expect(url.searchParams.get('fm')).toBe(format))
+    })
+  })
+
+  it('<source> と <img> の候補幅・画質を揃える（フォーマットのみ異なる）', () => {
+    const result = buildResponsiveImage(image, 450, '450px')
+    const toWidthAndQuality = (srcset: string): string[] =>
+      parseSrcset(srcset).map(
+        ({ url, descriptor }) =>
+          `${url.searchParams.get('w')}/${url.searchParams.get('q')}/${descriptor}`
+      )
+    result.sources.forEach(({ srcset }) =>
+      expect(toWidthAndQuality(srcset)).toEqual(toWidthAndQuality(result.srcset))
+    )
+  })
+
+  it('<img> の src / srcset はフォールバック（WebP）で配信する', () => {
+    const result = buildResponsiveImage(image, 450, '450px')
+    expect(new URL(result.src).searchParams.get('fm')).toBe(FALLBACK_FORMAT)
+    parseSrcset(result.srcset).forEach(({ url }) =>
+      expect(url.searchParams.get('fm')).toBe(FALLBACK_FORMAT)
+    )
+  })
 
   it('候補幅を実ピクセル幅の w 記述子で並べる', () => {
     const result = buildResponsiveImage(image, 450, '450px')
@@ -130,5 +184,21 @@ describe('buildResponsiveImage', () => {
     const result = buildResponsiveImage(image, 375, '375px')
     expect(result.width).toBe(375)
     expect(result.height).toBe(500)
+  })
+})
+
+describe('getPreferredSource', () => {
+  const image = buildResponsiveImage({ url: SOURCE, width: 1875, height: 2500 }, 450, '450px')
+
+  it('最優先の <source> を返す', () => {
+    const [first] = image.sources
+    expect(getPreferredSource(image)).toEqual(first)
+  })
+
+  it('<source> が無い場合は <img> の srcset と MIME タイプを返す', () => {
+    expect(getPreferredSource({ ...image, sources: [] })).toEqual({
+      type: IMAGE_FORMATS[FALLBACK_FORMAT],
+      srcset: image.srcset,
+    })
   })
 })

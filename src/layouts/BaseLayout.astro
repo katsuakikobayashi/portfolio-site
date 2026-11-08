@@ -20,6 +20,8 @@ interface Props {
   /**
    * ファーストビューの主要画像（LCP 候補）。指定時は <link rel="preload"> を出力する。
    * media を指定すると、その条件に合う端末でのみ先読みする（SP で非表示の画像を落とさない）。
+   * type / srcset は <picture> で最優先される <source> と一致させること（getPreferredSource）。
+   * type に非対応のブラウザは preload を読み込まないため、二重ダウンロードにならない。
    */
   preloadImage?: PreloadImage | undefined
   /** 検索エンジンにインデックスさせないページ（仮ページなど）で true にする */
@@ -27,6 +29,7 @@ interface Props {
 }
 
 interface PreloadImage {
+  type: string
   srcset: string
   sizes: string
   media?: string
@@ -102,7 +105,7 @@ const personJsonLd = {
       <link
         rel="preload"
         as="image"
-        type="image/webp"
+        type={preloadImage.type}
         imagesrcset={preloadImage.srcset}
         imagesizes={preloadImage.sizes}
         media={preloadImage.media}

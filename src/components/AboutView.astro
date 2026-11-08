@@ -1,6 +1,7 @@
 ---
 import PageHeader from '@/components/PageHeader.astro'
 import Profile from '@/components/Profile.astro'
+import ResponsivePicture from '@/components/ResponsivePicture.astro'
 import type { Locale } from '@/i18n/config'
 import { useTranslations } from '@/i18n/ui'
 import type { ResponsiveImage } from '@/lib/microcms/image'
@@ -58,13 +59,9 @@ const t = useTranslations(locale)
 
   {photo && (
     <figure class="p-about__photo">
-      <img
+      <ResponsivePicture
         class="p-about__photo-image"
-        src={photo.src}
-        srcset={photo.srcset}
-        sizes={photo.sizes}
-        width={photo.width}
-        height={photo.height}
+        image={photo}
         alt={t('about.photoAlt')}
         loading="lazy"
         decoding="async"

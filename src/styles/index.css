@@ -10,6 +10,7 @@
 @import url('./layout.css');
 @import url('./component/link.css');
 @import url('./component/touch-target.css');
+@import url('./component/picture.css');
 @import url('./project/profile.css');
 @import url('./project/page-header.css');
 @import url('./project/slideshow.css');

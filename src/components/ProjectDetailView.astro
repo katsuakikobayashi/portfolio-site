@@ -1,6 +1,7 @@
 ---
 import PageHeader from '@/components/PageHeader.astro'
 import Profile from '@/components/Profile.astro'
+import ResponsivePicture from '@/components/ResponsivePicture.astro'
 import type { Locale } from '@/i18n/config'
 import { useTranslations } from '@/i18n/ui'
 import type { ResponsiveImage } from '@/lib/microcms/image'
@@ -97,13 +98,9 @@ const mediaStyle = [
         {images.map((image, i) => (
           <li class="p-project__gallery-item">
             {/* 1 枚目は LCP 候補のため即時・高優先度で読み込み、2 枚目以降は遅延読み込みにする */}
-            <img
+            <ResponsivePicture
               class="p-project__image"
-              src={image.src}
-              srcset={image.srcset}
-              sizes={image.sizes}
-              width={image.width}
-              height={image.height}
+              image={image}
               style={`--project-image-aspect: ${image.width} / ${image.height}`}
               alt={`${title} ${i + 1}`}
               loading={i === 0 ? 'eager' : 'lazy'}

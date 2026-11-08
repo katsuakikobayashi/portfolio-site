@@ -5,7 +5,7 @@ import { PROJECT_IMAGE } from '@/data/media'
 import type { Locale } from '@/i18n/config'
 import { useTranslations } from '@/i18n/ui'
 import BaseLayout from '@/layouts/BaseLayout.astro'
-import { buildResponsiveImage } from '@/lib/microcms/image'
+import { buildResponsiveImage, getPreferredSource } from '@/lib/microcms/image'
 import type { Project } from '@/lib/project'
 import { parseRichText } from '@/lib/rich-text'
 
@@ -36,7 +36,7 @@ const [firstImage] = images
   title={`${project.title} | ${t('nav.projects')} | ${t('meta.title')}`}
   description={project.description || t('meta.description')}
   withJapaneseFont={locale === 'ja'}
-  preloadImage={firstImage && { srcset: firstImage.srcset, sizes: firstImage.sizes }}
+  preloadImage={firstImage && { ...getPreferredSource(firstImage), sizes: firstImage.sizes }}
 >
   <ProjectDetailView
     locale={locale}

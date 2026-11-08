@@ -82,6 +82,17 @@ test.describe('TOP ページ', () => {
     }
   })
 
+  test('JavaScript は低優先度で取得し、クリティカルリクエストチェーンに含めない', async ({
+    page,
+  }) => {
+    // integrations/script-priority.ts がビルド後に付与する
+    const priorities = await page
+      .locator('script[type="module"][src]')
+      .evaluateAll((scripts) => scripts.map((script) => script.getAttribute('fetchpriority')))
+    expect(priorities.length).toBeGreaterThan(0)
+    expect(priorities.every((priority) => priority === 'low')).toBe(true)
+  })
+
   test('構造化データ（Person）が出力される', async ({ page }) => {
     const jsonLd = await page.locator('script[type="application/ld+json"]').textContent()
     const data = JSON.parse(jsonLd ?? '{}')
@@ -98,7 +109,17 @@ test.describe('TOP スライドショー', () => {
     const preload = page.locator('link[rel="preload"][as="image"]')
     await expect(preload).toHaveCount(1)
     await expect(preload).toHaveAttribute('media', '(width >= 64rem)')
-    await expect(preload).toHaveAttribute('imagesrcset', /fm=webp/)
+    // <picture> で最優先される AVIF と一致させる
+    await expect(preload).toHaveAttribute('type', 'image/avif')
+    await expect(preload).toHaveAttribute('imagesrcset', /fm=avif/)
+  })
+
+  test('画像は AVIF を優先し、WebP をフォールバックにする', async ({ page }) => {
+    await page.goto('/')
+    const source = page.locator('.p-slideshow__item picture > source').first()
+    await expect(source).toHaveAttribute('type', 'image/avif')
+    await expect(source).toHaveAttribute('srcset', /fm=avif/)
+    await expect(source).toHaveAttribute('sizes', /.+/)
   })
 
   test('画像は WebP・幅別画質の srcset と寸法を持つ', async ({ page }) => {

@@ -1,4 +1,5 @@
 ---
+import ResponsivePicture from '@/components/ResponsivePicture.astro'
 import type { ResponsiveImage } from '@/lib/microcms/image'
 
 /**
@@ -26,13 +27,9 @@ const { images, alt, class: className } = Astro.props
   <ul class:list={['p-slideshow', 'js-slideshow', className]}>
     {images.map((image, i) => (
       <li class:list={['p-slideshow__item', 'js-slideshow-item', i === 0 && 'is-active']}>
-        <img
+        <ResponsivePicture
           class="p-slideshow__image"
-          src={image.src}
-          srcset={image.srcset}
-          sizes={image.sizes}
-          width={image.width}
-          height={image.height}
+          image={image}
           alt={images.length > 1 ? `${alt} ${i + 1}` : alt}
           loading="lazy"
           decoding="async"

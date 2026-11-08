@@ -1,0 +1,12 @@
+/**
+ * Component 層: CMS 画像の <picture> ラッパー（ResponsivePicture.astro）。
+ *
+ * <picture> はフォーマットの出し分けのためだけに使い、レイアウト上の箱は作らない。
+ * display: contents にすることで、<img> が親（グリッド・絶対配置の基準など）の
+ * 直接の子と同じように振る舞い、<img> に当てた既存のスタイルがそのまま効く。
+ */
+@layer component {
+  .c-picture {
+    display: contents;
+  }
+}
