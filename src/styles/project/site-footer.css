@@ -1,11 +1,228 @@
 /**
  * Project 層: サイト共通フッター。
+ *
+ * SP（既定）: 「jp / en　©2026　＋」の 1 行。＋ で上にメニュー
+ *             （Projects About ｜ Contact + メール / instagram）を開く。
+ * PC        : 「Projects → / About → / Contact → メール / instagram / jp / en ©2026」を
+ *             4 カラムグリッドに沿って 1 行で常時表示する。
+ * ナビ・メタ情報はグリッドを subgrid で継承し、カンプのカラム位置に揃える。
  */
 @layer project {
-  .p-site-footer__copyright {
-    font-size: var(--font-size-fine);
-    letter-spacing: var(--letter-spacing-fine);
+  .p-site-footer {
+    display: grid;
+    grid-template-columns: var(--grid-columns-sp);
+    align-items: center;
+    /* メニューを開いたとき、背面の本文と重なっても読めるよう地色で塗る */
+    background-color: var(--color-bg);
+    font-size: var(--font-size-label);
+    letter-spacing: var(--letter-spacing-label);
     line-height: var(--line-height-single);
-    color: var(--color-text-muted);
+  }
+
+  /* ---------------------------------------------------------------
+   * ナビゲーション（SP では開閉メニュー）
+   * ------------------------------------------------------------- */
+  .p-site-footer__nav {
+    display: none;
+    grid-column: 1 / -1;
+    grid-row: 1;
+    grid-template-columns: subgrid;
+    align-items: start;
+    margin-block-end: var(--spacing-xl);
+  }
+
+  .p-site-footer.is-menu-open .p-site-footer__nav {
+    display: grid;
+    animation: fade-in var(--duration-normal) var(--ease-out-cubic);
+  }
+
+  .p-site-footer__pages {
+    grid-column: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-inline-item);
+  }
+
+  .p-site-footer__link {
+    color: var(--color-text);
+    transition: opacity var(--duration-normal) var(--ease-out-cubic);
+  }
+
+  /* SP メニューではリンクを下線で示す */
+  .p-site-footer__label {
+    text-decoration: underline;
+    text-decoration-thickness: var(--underline-thickness);
+    text-underline-offset: var(--underline-offset);
+  }
+
+  /* 現在のページは取り消し線で非活性であることを示す（デザイン指定） */
+  .p-site-footer__link--current .p-site-footer__label {
+    text-decoration-line: line-through;
+  }
+
+  @media (any-hover: hover) {
+    a.p-site-footer__link:hover {
+      opacity: 0.6;
+    }
+  }
+
+  /* 矢印は PC のみ */
+  .p-site-footer__arrow {
+    display: none;
+    margin-inline-start: var(--spacing-inline-arrow);
+  }
+
+  .p-site-footer__contact {
+    grid-column: 2;
+  }
+
+  .p-site-footer__contact-list {
+    margin-block-start: var(--spacing-sm);
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: var(--spacing-list);
+    font-size: var(--font-size-body);
+  }
+
+  /* ---------------------------------------------------------------
+   * 言語切り替え・コピーライト
+   * ------------------------------------------------------------- */
+  .p-site-footer__meta {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    display: grid;
+    grid-template-columns: subgrid;
+    align-items: center;
+  }
+
+  /* ---------------------------------------------------------------
+   * 開閉ボタン（＋ / －）。アイコンは疑似要素の 2 本線で描画する
+   * ------------------------------------------------------------- */
+  .p-site-footer__toggle {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: end;
+    display: grid;
+    place-items: center end;
+    inline-size: var(--size-touch-target);
+    block-size: var(--size-touch-target);
+    /* タップ領域を広げても行の高さは文字に揃える */
+    margin-block: calc((var(--size-touch-target) - 1lh) / -2);
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--color-text);
+    cursor: pointer;
+  }
+
+  .p-site-footer__toggle::before,
+  .p-site-footer__toggle::after {
+    content: '';
+    grid-area: 1 / 1;
+    background-color: currentcolor;
+  }
+
+  .p-site-footer__toggle::before {
+    inline-size: var(--size-icon);
+    block-size: var(--size-hairline);
+  }
+
+  .p-site-footer__toggle::after {
+    inline-size: var(--size-hairline);
+    block-size: var(--size-icon);
+    /* 縦線を横線の中央に置く */
+    margin-inline-end: calc((var(--size-icon) - var(--size-hairline)) / 2);
+    transition: transform var(--duration-normal) var(--ease-out-cubic);
+  }
+
+  /* 開いている間は縦線を畳んで「－」にする */
+  .p-site-footer__toggle[aria-expanded='true']::after {
+    transform: scaleY(0);
+  }
+
+  /* ---------------------------------------------------------------
+   * 写真に重ねるフッター（Project 詳細）
+   * PC / SP とも画面下端に固定し、写真だけをスクロールさせる。
+   * 文字の上に地色の帯（--spacing-footer-band）を設け、背面の写真を隠す。
+   * ページの最下部に置いた要素を sticky で下端に留めるため、SP でメニューを開いて
+   * 高さが増えても上方向へ伸びる。
+   * ------------------------------------------------------------- */
+  .p-site-footer--overlay {
+    position: sticky;
+    inset-block-end: 0;
+    padding-block-start: var(--spacing-footer-band);
+  }
+
+  /* ---------------------------------------------------------------
+   * PC: 常時表示の 1 行ナビ
+   * ------------------------------------------------------------- */
+  @media (width >= 64rem) {
+    .p-site-footer {
+      grid-template-columns: var(--grid-columns-pc);
+      align-items: baseline;
+    }
+
+    .p-site-footer__nav,
+    .p-site-footer.is-menu-open .p-site-footer__nav {
+      display: grid;
+      grid-column: 1 / 4;
+      align-items: baseline;
+      margin-block-end: 0;
+      animation: none;
+    }
+
+    .p-site-footer__pages {
+      grid-column: 1 / 3;
+      display: grid;
+      grid-template-columns: subgrid;
+    }
+
+    .p-site-footer__label {
+      text-decoration-line: none;
+    }
+
+    .p-site-footer__arrow {
+      display: inline;
+    }
+
+    /* カンプでは第 3 カラム幅ちょうどに収まる 1 行。フォント描画差で折り返さないよう、
+       はみ出す場合は空いている第 4 カラム側へ伸ばす */
+    .p-site-footer__contact {
+      grid-column: 3;
+      display: flex;
+      align-items: baseline;
+      column-gap: var(--spacing-inline-item);
+      white-space: nowrap;
+    }
+
+    .p-site-footer__contact-list {
+      margin-block-start: 0;
+      flex-direction: row;
+      gap: 0;
+      font-size: inherit;
+    }
+
+    .p-site-footer__contact-item + .p-site-footer__contact-item::before {
+      content: '/';
+      margin-inline: var(--spacing-inline-item);
+    }
+
+    .p-site-footer__contact .c-link {
+      text-decoration-line: none;
+    }
+
+    .p-site-footer__meta {
+      grid-column: 4;
+      grid-row: 1;
+      justify-self: end;
+      display: flex;
+      align-items: baseline;
+      gap: var(--spacing-inline-group);
+    }
+
+    .p-site-footer__toggle {
+      display: none;
+    }
   }
 }

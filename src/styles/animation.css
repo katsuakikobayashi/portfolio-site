@@ -6,12 +6,25 @@
     --ease-out-cubic: cubic-bezier(0.33, 1, 0.68, 1);
     --duration-fast: 0.15s;
     --duration-normal: 0.3s;
+    --duration-slow: 1.2s; /* スライドショーのクロスフェード */
+    --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
     :root {
       --duration-fast: 0.01ms;
       --duration-normal: 0.01ms;
+      --duration-slow: 0.01ms;
     }
 
     :where(html) {

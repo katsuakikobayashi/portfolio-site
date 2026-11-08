@@ -1,6 +1,8 @@
 import type { APIRoute } from 'astro'
-import { SITE } from '@/data/site'
+import { SITE, parseDisciplines } from '@/data/site'
 import { useTranslations } from '@/i18n/ui'
+import { getProjects } from '@/lib/microcms'
+import { toProjectPath } from '@/lib/project'
 
 /**
  * @function GET
@@ -10,21 +12,36 @@ import { useTranslations } from '@/i18n/ui'
  * @param {object} context - Astro のエンドポイントコンテキスト
  * @returns {Response} text/markdown の llms.txt レスポンス
  */
-export const GET: APIRoute = ({ site }) => {
+export const GET: APIRoute = async ({ site }) => {
   const en = useTranslations('en')
   const base = new URL('/', site).href.replace(/\/$/, '')
+  const projects = await getProjects()
+  // 説明・年は任意項目のため、入力されているものだけを「: 説明 (年)」の形で添える
+  const projectLines = projects.map((project) => {
+    const details = [project.description, project.year && `(${project.year})`]
+      .filter(Boolean)
+      .join(' ')
+    const href = `${base}${toProjectPath(project.slug, 'en')}`
+    return `- [${project.title}](${href})${details ? `: ${details}` : ''}`
+  })
 
   const lines = [
     `# ${SITE.name}`,
     '',
-    `> ${en('meta.description')}. Works across ${en('top.disciplines').toLowerCase()}.`,
+    `> ${en('meta.description')}. Works across ${parseDisciplines(en('top.disciplines')).join(', ').toLowerCase()}.`,
     '',
     '## Pages',
     '',
-    `- [Home (Japanese)](${base}/): Name, role, and contact links.`,
-    `- [Home (English)](${base}/en/): Name, role, and contact links.`,
+    `- [Home (Japanese)](${base}/): Name, role, project photos, and contact links.`,
+    `- [Home (English)](${base}/en/): Name, role, project photos, and contact links.`,
     `- [About (Japanese)](${base}/about/): Profile and background.`,
     `- [About (English)](${base}/en/about/): Profile and background.`,
+    `- [Projects (Japanese)](${base}/projects/): List of projects, newest first.`,
+    `- [Projects (English)](${base}/en/projects/): List of projects, newest first.`,
+    '',
+    '## Projects',
+    '',
+    ...projectLines,
     '',
     '## Contact',
     '',

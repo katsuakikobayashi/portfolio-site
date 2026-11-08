@@ -1,0 +1,42 @@
+/**
+ * Project 層: 氏名・肩書き・分野のプロフィールブロック（全ページ共通の左カラム）。
+ */
+@layer project {
+  .p-profile {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+  }
+
+  .p-profile__name {
+    font-size: var(--font-size-title);
+    letter-spacing: var(--letter-spacing-title);
+    line-height: var(--line-height-single);
+  }
+
+  /* TOP 以外では氏名がホームへのリンクになるが、見た目はテキストのまま保つ */
+  .p-profile__home-link {
+    color: inherit;
+    transition: opacity var(--duration-normal) var(--ease-out-cubic);
+  }
+
+  @media (any-hover: hover) {
+    .p-profile__home-link:hover {
+      opacity: 0.6;
+    }
+  }
+
+  .p-profile__role {
+    margin-block-start: var(--spacing-lg);
+    font-size: var(--font-size-label);
+    letter-spacing: var(--letter-spacing-label);
+    line-height: var(--line-height-single);
+  }
+
+  .p-profile__disciplines {
+    margin-block-start: var(--spacing-xs);
+    font-size: var(--font-size-body);
+    letter-spacing: var(--letter-spacing-body);
+    line-height: var(--line-height-single);
+  }
+}

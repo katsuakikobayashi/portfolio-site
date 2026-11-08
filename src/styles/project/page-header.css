@@ -1,0 +1,19 @@
+/**
+ * Project 層: SP 下層ページのページヘッダー「Katsuaki Kobayashi - {ページ名}」。
+ * PC での非表示は各ページの CSS（`--sp` クラス）で行う。
+ */
+@layer project {
+  .p-page-header__title {
+    font-size: var(--font-size-header);
+    letter-spacing: var(--letter-spacing-title);
+    line-height: var(--line-height-single);
+  }
+
+  .p-page-header__home {
+    color: inherit;
+  }
+
+  .p-page-header__sep {
+    margin-inline: var(--spacing-inline-arrow);
+  }
+}

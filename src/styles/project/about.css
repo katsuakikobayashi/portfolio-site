@@ -1,105 +1,66 @@
 /**
  * Project 層: About ページ固有のスタイル。
  *
- * PC（docs/design/about-pc.png）と SP（docs/design/about-sp.png）は
- * 肩書き・Contact セクションの有無が異なる別構成のデザインのため、
- * サイト全体で唯一この 1 箇所に限りメディアクエリを置き、
- * `.p-about__grid--pc` / `.p-about__grid--sp` の表示を切り替える
- * （mFLOCSS の PC/SP 別 DOM 分岐ルール）。
+ * PC: プロフィール（第 1〜2 カラム）+ 本文（第 3 カラム）+ 写真（第 4 カラム右寄せ）。
+ *     写真は本文にホバー / フォーカスしたときだけ表示する。
+ * SP: ページヘッダー（PageHeader.astro）+ 本文（写真なし）。
+ *
+ * PC のプロフィールと SP のページヘッダーは別 DOM（`--pc` / `--sp`）で、
+ * このファイルのメディアクエリでのみ表示を切り替える。
  */
 @layer project {
-  /* モバイルファースト: 既定は SP 構成を表示し、PC 構成は隠す */
-  .p-about__grid--pc {
+  /* ---------------------------------------------------------------
+   * PC / SP の切り替え（モバイルファースト）
+   * ------------------------------------------------------------- */
+  .p-about__identity--pc,
+  .p-about__photo {
     display: none;
   }
 
-  .p-about__grid--sp {
-    display: flex;
-    flex-direction: column;
-    align-items: start;
-  }
-
-  @media (min-width: 768px) {
-    .p-about__grid--pc {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      column-gap: var(--spacing-lg);
-      align-items: start;
-    }
-
-    .p-about__grid--sp {
+  @media (width >= 64rem) {
+    .p-about__identity--sp {
       display: none;
     }
+
+    .p-about__identity--pc {
+      display: flex;
+      grid-column: 1 / 3;
+    }
+
+    .p-about__article {
+      grid-column: 3;
+    }
+
+    .p-about__photo {
+      display: block;
+      grid-column: 4;
+      justify-self: end;
+      inline-size: var(--about-photo-inline-size);
+      /* キャプションを写真の下へ絶対配置し、写真そのものを縦中央に揃えるための基準 */
+      position: relative;
+      opacity: 0;
+      transition: opacity var(--duration-normal) var(--ease-out-cubic);
+    }
+
+    /*
+     * 本文にホバー（キーボード操作時は本文内フォーカス）している間だけ写真を表示する。
+     * opacity のみで切り替え、レイアウトは常に確保しておくため表示時にずれない。
+     * 画像は loading="lazy" だが表示領域内に配置済みのため、ホバー前に読み込みが完了する。
+     */
+    .p-about:has(.p-about__article:hover, .p-about__article:focus-within) .p-about__photo {
+      opacity: 1;
+    }
+  }
+
+  /* ホバーできない端末（PC 幅のタブレット等）では写真を見る手段がなくなるため常時表示する */
+  @media (width >= 64rem) and (any-hover: none) {
+    .p-about__photo {
+      opacity: 1;
+    }
   }
 
   /* ---------------------------------------------------------------
-   * PC: 左に TOP 情報の再掲（淡色）、右に本文の 2 カラム構成
-   * ------------------------------------------------------------- */
-
-  .p-about__recap {
-    display: flex;
-    flex-direction: column;
-    align-items: start;
-    /* TOP 情報の再掲であることを示す淡色。リンクも文脈色を継承させる */
-    color: var(--color-text-muted);
-  }
-
-  .p-about__recap .c-link {
-    color: inherit;
-  }
-
-  .p-about__breadcrumb {
-    display: flex;
-    align-items: baseline;
-    /* パンくずは現在地を示すナビゲーションなので、再掲ブロックとは独立して黒 */
-    color: var(--color-text);
-  }
-
-  .p-about__breadcrumb-sep {
-    margin-inline: 0.4em;
-  }
-
-  .p-about__content {
-    /* 右カラムの先頭を、左カラムのパンくず行と縦位置で揃える。
-       名前 + 見出し + 肩書きぶんの高さを、実寸ではなく既存トークンの
-       合算で表現し、フォントサイズ変更にも追従できるようにしている。 */
-    margin-block-start: calc(
-      var(--font-size-title) + var(--spacing-md) + var(--font-size-label) + var(--spacing-xs) +
-        var(--font-size-body) + var(--spacing-lg)
-    );
-    /* グリッドの 1fr トラック幅（ページ右余白まで）をそのまま使う */
-    max-inline-size: none;
-  }
-
-  /* ---------------------------------------------------------------
-   * SP: 戻るリンク → 本文 → 言語切り替えの 1 カラム構成
-   * ------------------------------------------------------------- */
-  .p-about__back {
-    line-height: var(--line-height-single);
-  }
-
-  .p-about__back-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5em;
-    font-size: var(--font-size-label);
-    letter-spacing: var(--letter-spacing-label);
-  }
-
-  .p-about__back-arrow {
-    text-decoration: none;
-  }
-
-  .p-about__grid--sp .p-about__content {
-    margin-block-start: var(--spacing-2lg);
-  }
-
-  .p-about__language-sp {
-    margin-block-start: var(--spacing-2lg);
-  }
-
-  /* ---------------------------------------------------------------
-   * 共通: 氏名見出しと本文
+   * 本文
    * ------------------------------------------------------------- */
   .p-about__name {
     font-size: var(--font-size-title);
@@ -107,20 +68,49 @@
     line-height: var(--line-height-single);
   }
 
-  /* 氏名「小林　克彰」のみ指定のカーニング（0.56em）を適用する */
-  .p-about__name--ja {
-    letter-spacing: 0.56em;
-  }
-
   .p-about__paragraph {
-    margin-block-start: var(--spacing-sm);
     font-size: var(--font-size-body);
     letter-spacing: var(--letter-spacing-body);
     line-height: var(--line-height-prose);
   }
 
+  /* 和文ページ（html[lang="ja"]）の氏名・本文のみ字間を差し替える */
+  .p-about__name:lang(ja) {
+    letter-spacing: var(--letter-spacing-title-ja);
+  }
+
+  .p-about__paragraph:lang(ja) {
+    letter-spacing: var(--letter-spacing-prose-ja);
+  }
+
+  .p-about__name + .p-about__paragraph {
+    margin-block-start: var(--spacing-md);
+  }
+
   .p-about__paragraph + .p-about__paragraph {
     /* 空行 1 行ぶんの段落間隔 */
     margin-block-start: 1lh;
+  }
+
+  /* ---------------------------------------------------------------
+   * 写真（PC のみ）
+   * ------------------------------------------------------------- */
+  .p-about__photo-image {
+    inline-size: 100%;
+    block-size: auto;
+    aspect-ratio: var(--media-aspect);
+    object-fit: cover;
+  }
+
+  .p-about__photo-caption {
+    position: absolute;
+    inset-block-start: 100%;
+    inset-inline-end: 0;
+    margin-block-start: var(--spacing-caption);
+    font-size: var(--font-size-fine);
+    letter-spacing: var(--letter-spacing-fine);
+    line-height: var(--line-height-single);
+    color: var(--color-text-muted);
+    white-space: nowrap;
   }
 }

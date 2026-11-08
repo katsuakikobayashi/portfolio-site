@@ -1,6 +1,7 @@
 /**
  * Tokens 層: プリミティブな設計値のみを定義する。
  * セマンティックな意味付けは Theme 層で行う。
+ * 数値はデザインカンプ（docs/design/ の pc 1400px / mobile 393px）の実測値。
  */
 
 /* @property は @layer の外に置く必要がある（CSS 仕様の制約） */
@@ -13,7 +14,7 @@
 @property --viewport-max {
   syntax: '<number>';
   inherits: true;
-  initial-value: 1440;
+  initial-value: 1400;
 }
 
 @layer tokens {
@@ -22,7 +23,7 @@
      * ビューポート基準値（Figma アートボード幅）
      * ------------------------------------------------------------- */
     --viewport-min: 393; /* iPhone 16 */
-    --viewport-max: 1440; /* Desktop */
+    --viewport-max: 1400; /* Desktop */
 
     /* ---------------------------------------------------------------
      * フルード計算ヘルパー
@@ -43,26 +44,76 @@
      * 色のプリミティブ値
      * ------------------------------------------------------------- */
     --color-black: oklch(0% 0 0); /* #000000 */
-    --color-sand-300: oklch(84.32% 0.0096 106.6); /* #ccccc5 デザイン指定の地色 */
+    --color-gray-100: oklch(94.55% 0.0027 106.5); /* #ededeb デザイン指定の地色 */
 
     /* ---------------------------------------------------------------
      * タイポグラフィのプリミティブ値（min → max: px 相当）
      * ------------------------------------------------------------- */
-    --size-text-10-12: calc(10 * var(--px) + 2 * var(--fluid));
-    --size-text-11-13: calc(11 * var(--px) + 2 * var(--fluid));
-    --size-text-13-16: calc(13 * var(--px) + 3 * var(--fluid));
-    --size-text-16-20: calc(16 * var(--px) + 4 * var(--fluid));
+    --size-text-10: calc(10 * var(--px));
+    --size-text-11: calc(11 * var(--px));
+    --size-text-11-12: calc(11 * var(--px) + 1 * var(--fluid));
+    --size-text-12-13: calc(12 * var(--px) + 1 * var(--fluid));
+    --size-text-13: calc(13 * var(--px));
+    --size-text-15-17: calc(15 * var(--px) + 2 * var(--fluid));
+    /* 和文本文の字間（SP 11px×0.01em ≒ 0.1px → PC 12px×0.055em ≒ 0.66px） */
+    --size-tracking-0-1-0-66: calc(0.1 * var(--px) + 0.56 * var(--fluid));
 
     /* ---------------------------------------------------------------
      * スペーシングのプリミティブ値（min → max: px 相当）
      * ------------------------------------------------------------- */
-    --size-space-10-12: calc(10 * var(--px) + 2 * var(--fluid));
-    --size-space-15-17: calc(15 * var(--px) + 2 * var(--fluid));
-    --size-space-18-21: calc(18 * var(--px) + 3 * var(--fluid));
-    --size-space-45-53: calc(45 * var(--px) + 8 * var(--fluid));
-    --size-space-63-80: calc(63 * var(--px) + 17 * var(--fluid));
-    --size-space-88-100: calc(88 * var(--px) + 12 * var(--fluid));
-    --size-space-28-100: calc(28 * var(--px) + 72 * var(--fluid));
+    --size-space-8: calc(8 * var(--px));
+    --size-space-9: calc(9 * var(--px));
+    --size-space-12-14: calc(12 * var(--px) + 2 * var(--fluid));
+    --size-space-16: calc(16 * var(--px));
+    --size-space-17: calc(17 * var(--px));
+    --size-space-17-36: calc(17 * var(--px) + 19 * var(--fluid));
+    --size-space-19: calc(19 * var(--px));
+    --size-space-20-40: calc(20 * var(--px) + 20 * var(--fluid));
+    --size-space-23-30: calc(23 * var(--px) + 7 * var(--fluid));
+    --size-space-28-31: calc(28 * var(--px) + 3 * var(--fluid));
+    --size-space-32: calc(32 * var(--px));
+    --size-space-32-60: calc(32 * var(--px) + 28 * var(--fluid));
+    --size-space-44: calc(44 * var(--px));
+    --size-space-86-106: calc(86 * var(--px) + 20 * var(--fluid));
+
+    /* ---------------------------------------------------------------
+     * グリッド（カンプのカラム開始位置の差分を fr 比で保持する）
+     * PC: 60 | 296 | 514 | 1340(右端) → 236 : 218 : 375 : 451
+     * SP: 32 | 145 | 361(右端)        → 113 : 216
+     * ------------------------------------------------------------- */
+    /* minmax(0, …) で中身の最小幅に引っ張られず、常にカンプの比率を保つ */
+    --grid-columns-4: minmax(0, 236fr) minmax(0, 218fr) minmax(0, 375fr) minmax(0, 451fr);
+    --grid-columns-2: minmax(0, 113fr) minmax(0, 216fr);
+    /* About 写真の幅が第 4 カラムに占める比率 = 300 / 451 */
+    --grid-column-4-photo: 66.52%;
+    /* 第 4 カラム右寄せの写真（300px）の幅が第 3 カラム幅に占める比率 = 300 / 375 */
+    --grid-column-3-photo: 80%;
+    /* 第 3 カラム右端からコンテンツ右端（第 4 カラム右端）までの距離の、第 3 カラム幅に対する比率 = 451 / 375 */
+    --grid-column-3-to-end: 120.2667%;
+    /*
+     * Project 詳細（PC）: 写真をページ中央に置く独自グリッド。
+     * PC: 60 | 475 | 925 | 1030 | 1340(右端) → 415 : 450 : 105 : 310
+     */
+    --grid-columns-project: minmax(0, 415fr) minmax(0, 450fr) minmax(0, 105fr) minmax(0, 310fr);
+    /* 写真カラムの幅がコンテンツ幅に占める比率 = 450 / 1280 */
+    --grid-project-media-ratio: 0.3516;
+
+    /* ---------------------------------------------------------------
+     * アスペクト比
+     * ------------------------------------------------------------- */
+    --aspect-portrait: 3 / 4;
+
+    /* ---------------------------------------------------------------
+     * ビューポート高さに対する位置
+     * ------------------------------------------------------------- */
+    --size-viewport-block-10: 10svh;
+    --size-viewport-block-32-4: 32.4svh;
+
+    /* ---------------------------------------------------------------
+     * アイコン・操作領域
+     * ------------------------------------------------------------- */
+    --size-icon-11: calc(11 * var(--px)); /* メニューの ＋ / － */
+    --size-touch-44: calc(44 * var(--px)); /* WCAG 推奨のタップ領域 */
 
     /* ---------------------------------------------------------------
      * 線幅

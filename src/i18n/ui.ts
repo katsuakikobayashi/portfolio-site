@@ -1,60 +1,48 @@
 import type { Locale } from './config'
 
 /**
- * 画面表示文言の辞書。
- * 原稿（docs/design/web text.rtf）どおり、TOP の文言は jp / en 共通。
+ * 画面表示文言の辞書（UI の固定文言のみ）。
+ * About の氏名・本文・写真は microCMS（エンドポイント `about`）、
+ * Projects の内容は microCMS（エンドポイント `projects`）で管理する。
  */
 const dictionary = {
   ja: {
     'meta.title': 'Katsuaki Kobayashi',
     'meta.description': 'Designer based in Tokyo, Japan',
     'top.role': 'Designer',
-    'top.disciplines': 'Product / Graphic / Photography',
+    'top.disciplines': 'Product / Select / Graphic / Photography ...',
+    'top.slideAlt': 'Katsuaki Kobayashi のプロジェクト写真',
+    'nav.projects': 'Projects',
     'nav.about': 'About',
-    'nav.home': 'Home',
     'contact.heading': 'Contact',
     'contact.instagram': 'instagram',
-    'contact.copied': 'コピーしました',
-    'about.name': '小林 克彰',
-    /* 改行位置は指示どおり固定（\n で明示的な改行を表す） */
-    'about.paragraph1': [
-      '1997年福井県生まれ。',
-      '武蔵野美術大学 基礎デザイン学科を卒業後、',
-      'nendo、芦沢啓治建築設計事務所を経て、2026年に独立。',
-    ].join('\n'),
-    'about.paragraph2': [
-      '建築や空間に関わるプロダクトのデザインやセレクトを主軸に、',
-      '日用品やグラフィックなど、領域を横断しながら活動している。',
-    ].join('\n'),
-    'a11y.pageNav': 'ページ',
+    'contact.copied': 'Copied',
+    'about.photoAlt': '小林 克彰のポートレート',
+    'projects.headerLabel': 'List',
+    'project.headerLabel': 'Project',
+    'project.textLabel': 'プロジェクト概要',
+    'a11y.siteNav': 'サイト内',
     'a11y.languageNav': '言語切り替え',
+    'a11y.menu': 'メニュー',
   },
   en: {
     'meta.title': 'Katsuaki Kobayashi',
     'meta.description': 'Designer based in Tokyo, Japan',
     'top.role': 'Designer',
-    'top.disciplines': 'Product / Graphic / Photography',
+    'top.disciplines': 'Product / Select / Graphic / Photography ...',
+    'top.slideAlt': 'Project photo by Katsuaki Kobayashi',
+    'nav.projects': 'Projects',
     'nav.about': 'About',
-    'nav.home': 'Home',
     'contact.heading': 'Contact',
     'contact.instagram': 'instagram',
     'contact.copied': 'Copied',
-    'about.name': 'Katsuaki Kobayashi',
-    /* 改行位置は指示どおり固定（\n で明示的な改行を表す） */
-    'about.paragraph1': [
-      'Born in Fukui, Japan, in 1997.',
-      'After graduating from Musashino Art University,',
-      'Department of Science of Design,',
-      'worked at nendo and Keiji Ashizawa Design',
-      'before establishing an independent practice in 2026.',
-    ].join('\n'),
-    'about.paragraph2': [
-      'Focusing on product design and selection',
-      'for architecture and interior spaces,',
-      'alongside everyday objects and graphic design.',
-    ].join('\n'),
-    'a11y.pageNav': 'Pages',
+    'about.photoAlt': 'Portrait of Katsuaki Kobayashi',
+    'projects.headerLabel': 'List',
+    'project.headerLabel': 'Project',
+    'project.textLabel': 'Project details',
+    'a11y.siteNav': 'Site',
     'a11y.languageNav': 'Language',
+    'a11y.menu': 'Menu',
   },
 } as const
 

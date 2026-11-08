@@ -1,0 +1,49 @@
+---
+import ProjectDetailView from '@/components/ProjectDetailView.astro'
+import SiteFooter from '@/components/SiteFooter.astro'
+import { PROJECT_IMAGE } from '@/data/media'
+import type { Locale } from '@/i18n/config'
+import { useTranslations } from '@/i18n/ui'
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import { buildResponsiveImage } from '@/lib/microcms/image'
+import type { Project } from '@/lib/project'
+import { parseRichText } from '@/lib/rich-text'
+
+/**
+ * Project 詳細ページ（ja / en 共通）。
+ * 1 枚目の写真は PC / SP ともにファーストビューの主要画像のため preload する。
+ *
+ * フッターは写真の上に重ねて表示し（isOverlay）、一覧へ戻れるよう current を指定しない。
+ *
+ * @prop {Locale} locale - 表示ロケール
+ * @prop {Project} project - 表示するプロジェクト（getStaticPaths の props）
+ */
+interface Props {
+  locale: Locale
+  project: Project
+}
+
+const { locale, project } = Astro.props
+const t = useTranslations(locale)
+const images = project.images.map((image) =>
+  buildResponsiveImage(image, PROJECT_IMAGE.displayWidth, PROJECT_IMAGE.sizes)
+)
+const [firstImage] = images
+---
+
+<BaseLayout
+  locale={locale}
+  title={`${project.title} | ${t('nav.projects')} | ${t('meta.title')}`}
+  description={project.description || t('meta.description')}
+  withJapaneseFont={locale === 'ja'}
+  preloadImage={firstImage && { srcset: firstImage.srcset, sizes: firstImage.sizes }}
+>
+  <ProjectDetailView
+    locale={locale}
+    title={project.title}
+    year={project.year}
+    paragraphs={parseRichText(project.body[locale])}
+    images={images}
+  />
+  <SiteFooter locale={locale} pathname={Astro.url.pathname} isOverlay />
+</BaseLayout>

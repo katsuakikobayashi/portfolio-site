@@ -14,33 +14,25 @@ describe('useTranslations', () => {
     expect(t('a11y.languageNav')).toBe('Language')
   })
 
-  it('原稿どおり TOP の文言は jp / en 共通である', () => {
+  it('デザインどおり TOP の文言は jp / en 共通である', () => {
     const ja = useTranslations('ja')
     const en = useTranslations('en')
     expect(ja('top.role')).toBe(en('top.role'))
     expect(ja('top.disciplines')).toBe(en('top.disciplines'))
-    expect(ja('meta.description')).toBe(en('meta.description'))
+    expect(ja('nav.projects')).toBe(en('nav.projects'))
+    expect(ja('nav.about')).toBe(en('nav.about'))
+    expect(ja('projects.headerLabel')).toBe(en('projects.headerLabel'))
+    expect(ja('project.headerLabel')).toBe(en('project.headerLabel'))
   })
 
-  it('全ロケールで About の氏名と第 1 段落が空でない', () => {
+  it('全ロケールで画像の代替テキストと支援技術向けラベルが空でない', () => {
     for (const locale of LOCALES) {
       const t = useTranslations(locale)
-      expect(t('about.name').length).toBeGreaterThan(0)
-      expect(t('about.paragraph1').length).toBeGreaterThan(0)
+      expect(t('top.slideAlt').length).toBeGreaterThan(0)
+      expect(t('about.photoAlt').length).toBeGreaterThan(0)
+      expect(t('a11y.menu').length).toBeGreaterThan(0)
+      expect(t('project.textLabel').length).toBeGreaterThan(0)
     }
-  })
-
-  it('全ロケールで About は 2 段落構成である', () => {
-    for (const locale of LOCALES) {
-      expect(useTranslations(locale)('about.paragraph2').length).toBeGreaterThan(0)
-    }
-  })
-
-  it('About の段落は指示どおりの行数で改行される', () => {
-    expect(useTranslations('ja')('about.paragraph1').split('\n')).toHaveLength(3)
-    expect(useTranslations('ja')('about.paragraph2').split('\n')).toHaveLength(2)
-    expect(useTranslations('en')('about.paragraph1').split('\n')).toHaveLength(5)
-    expect(useTranslations('en')('about.paragraph2').split('\n')).toHaveLength(3)
   })
 
   it('全ロケールでコピー完了メッセージが空でない', () => {

@@ -1,7 +1,7 @@
 ---
 import { Font } from 'astro:assets'
 import Analytics from '@/components/Analytics.astro'
-import { SITE } from '@/data/site'
+import { SITE, parseDisciplines } from '@/data/site'
 import { HREF_LANG, HTML_LANG, LOCALES, OG_LOCALE, type Locale } from '@/i18n/config'
 import { useTranslations } from '@/i18n/ui'
 import { getAlternatePath } from '@/i18n/utils'
@@ -17,9 +17,29 @@ interface Props {
    * 日本語の本文を実際に持つページでのみ true にすること。
    */
   withJapaneseFont?: boolean
+  /**
+   * ファーストビューの主要画像（LCP 候補）。指定時は <link rel="preload"> を出力する。
+   * media を指定すると、その条件に合う端末でのみ先読みする（SP で非表示の画像を落とさない）。
+   */
+  preloadImage?: PreloadImage | undefined
+  /** 検索エンジンにインデックスさせないページ（仮ページなど）で true にする */
+  noindex?: boolean
 }
 
-const { locale, title, description, withJapaneseFont = false } = Astro.props
+interface PreloadImage {
+  srcset: string
+  sizes: string
+  media?: string
+}
+
+const {
+  locale,
+  title,
+  description,
+  withJapaneseFont = false,
+  preloadImage,
+  noindex = false,
+} = Astro.props
 const t = useTranslations(locale)
 
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site)
@@ -40,7 +60,7 @@ const personJsonLd = {
   url: canonicalUrl.href,
   image: ogImageUrl.href,
   jobTitle: t('top.role'),
-  knowsAbout: t('top.disciplines').split(' / '),
+  knowsAbout: parseDisciplines(t('top.disciplines')),
   description,
   email: `mailto:${SITE.email}`,
   sameAs: [SITE.instagramUrl],
@@ -55,6 +75,7 @@ const personJsonLd = {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex" />}
     <link rel="canonical" href={canonicalUrl.href} />
     {alternates.map((alternate) => (
       <link rel="alternate" hreflang={HREF_LANG[alternate.locale]} href={alternate.href} />
@@ -77,6 +98,17 @@ const personJsonLd = {
 
     <Font cssVariable="--font-roboto" preload />
     {withJapaneseFont && <Font cssVariable="--font-noto-sans-jp" />}
+    {preloadImage && (
+      <link
+        rel="preload"
+        as="image"
+        type="image/webp"
+        imagesrcset={preloadImage.srcset}
+        imagesizes={preloadImage.sizes}
+        media={preloadImage.media}
+        fetchpriority="high"
+      />
+    )}
 
     <script
       is:inline

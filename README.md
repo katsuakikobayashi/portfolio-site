@@ -14,13 +14,15 @@
 
 ## デザイン
 
-| 素材                            | 内容                                  |
-| ------------------------------- | ------------------------------------- |
-| `docs/design/Desktop - 1.png`   | TOPページ デスクトップ（1440×1024）   |
-| `docs/design/iPhone 16 - 1.png` | TOPページ モバイル（393×852）         |
-| `docs/design/about-pc.png`      | Aboutページ デスクトップ（1440×1024） |
-| `docs/design/about-sp.png`      | Aboutページ モバイル（393×852）       |
-| `docs/design/web text.rtf`      | 掲載原稿（日本語・英語）              |
+| 素材                                   | 内容                                        |
+| -------------------------------------- | ------------------------------------------- |
+| `docs/design/pc top.png`               | TOPページ デスクトップ（1400×980）          |
+| `docs/design/mobile top.png`           | TOPページ モバイル（393×670）               |
+| `docs/design/mobile top (menu).png`    | モバイルのフッターメニュー展開時（393×670） |
+| `docs/design/pc About (jp/en).png`     | Aboutページ デスクトップ（1400×980）        |
+| `docs/design/mobile About (jp/en).png` | Aboutページ モバイル（393×670）             |
+
+TOPのスライド写真、Aboutの氏名・本文・写真・写真クレジット、Projectsの内容はmicroCMSで管理しています（下記「コンテンツ管理」参照）。
 
 Figmaへのアクセスが必要な場合はプロジェクトリーダーへ依頼してください。
 
@@ -47,11 +49,19 @@ npm install
 
 ### 環境変数の設定
 
-必須の環境変数はありません。計測タグを有効化する場合のみ、プロジェクトルートに`.env`を作成してください。
+`.env.example`をコピーして`.env`を作成し、値を設定してください。`.env`はGit管理対象外です。
 
 ```
-PUBLIC_GTM_ID=GTM-XXXXXXX
+cp .env.example .env
 ```
+
+| 変数名             | 必須 | 内容                                                                               |
+| ------------------ | ---- | ---------------------------------------------------------------------------------- |
+| `MICROCMS_DOMAIN`  | ○    | microCMSのサービスドメイン（`xxx`）またはサービスURL（`https://xxx.microcms.io/`） |
+| `MICROCMS_API_KEY` | ○    | microCMSのAPIキー。GET権限のみのキーを使用すること                                 |
+| `PUBLIC_GTM_ID`    |      | Google Tag ManagerのコンテナID                                                     |
+
+microCMSの2つの値はサーバー側（ビルド時）だけで参照し、ブラウザに配信されるJavaScriptには含まれません。未設定のままビルドするとエラーで停止します。
 
 `PUBLIC_GTM_ID`が未設定のときは計測スクリプトを一切出力しません。設定した場合は`netlify.toml`のContent-Security-Policyの`script-src`に`https://www.googletagmanager.com`を追加する必要があります。
 
@@ -80,14 +90,35 @@ PUBLIC_GTM_ID=GTM-XXXXXXX
 
 ## サイト構成
 
-| パス         | 言語    | 内容  |
-| ------------ | ------- | ----- |
-| `/`          | 日本語  | TOP   |
-| `/en/`       | English | TOP   |
-| `/about/`    | 日本語  | About |
-| `/en/about/` | English | About |
+| パス                  | 言語    | 内容                                   |
+| --------------------- | ------- | -------------------------------------- |
+| `/`                   | 日本語  | TOP                                    |
+| `/en/`                | English | TOP                                    |
+| `/about/`             | 日本語  | About                                  |
+| `/en/about/`          | English | About                                  |
+| `/projects/`          | 日本語  | Projects一覧（公開日の新しい順）       |
+| `/en/projects/`       | English | Projects一覧（公開日の新しい順）       |
+| `/projects/{url}/`    | 日本語  | Project詳細（`{url}`はCMSの`url`の値） |
+| `/en/projects/{url}/` | English | Project詳細（`{url}`はCMSの`url`の値） |
 
-言語切り替えは静的リンクのみで実装しており、JavaScriptを一切使用していません。
+言語切り替えは静的リンクのみで実装しています。JavaScriptはメールアドレスのコピー、SPメニューの開閉、TOPのスライドショー、Project詳細の概要エリアの高さ計測にのみ使用しています。
+
+---
+
+## コンテンツ管理（microCMS）
+
+| エンドポイント | 形式         | フィールド                                                                     | 使用箇所                      |
+| -------------- | ------------ | ------------------------------------------------------------------------------ | ----------------------------- |
+| `top`          | オブジェクト | `slideImages`（画像・複数）                                                    | TOPのスライドショー（PCのみ） |
+| `about`        | オブジェクト | `image`、`imageCaption`、`name`、`nameEn`、`text`、`textEn`                    | About                         |
+| `projects`     | リスト       | `title`、`url`、`year`、`description`、`thumbnail`、`images`、`body`、`bodyEn` | Projects一覧・詳細            |
+
+- 型定義は[src/lib/microcms/types.ts](./src/lib/microcms/types.ts)です。管理画面でフィールドを変更した場合はここも更新してください。
+- 本文（`text` / `textEn`）は空行で段落、改行で行を分けます。HTMLとしては解釈しません。
+- Projectsの`url`は詳細ページのURLになります。使える文字は英数字・`-`・`_`のみです。不正な文字や重複があるとビルドを止めます。
+- Projectsの本文（`body` / `bodyEn`）はリッチテキストです。段落・改行と、カスタムクラス付きの範囲（黒100%で表示）だけを解釈し、それ以外の装飾（リンク・太字など）は文字だけを表示します（[src/lib/rich-text.ts](./src/lib/rich-text.ts)）。HTMLをそのまま埋め込まないため、サニタイズライブラリは使っていません。`bodyEn`が空の場合は`body`を表示します。
+- 取得タイミング: `npm run build`（本番）はビルド時に1回だけ取得します。`npm run dev`（ローカル）はページを開くたびに取得するため、CMSの変更がリロードで反映されます。
+- 画像はmicroCMSの画像APIで配信します（[src/lib/microcms/image.ts](./src/lib/microcms/image.ts)）。形式はWebP（`fm=webp`）に統一し、DPR 1x・2x・3xの候補を`srcset`に並べます。画質（`q`）はDPR 1xで80、2xで60、3xで45です。高DPR端末では画素が細かく圧縮ノイズが目立たないため、解像度を上げる分だけ画質を下げて転送量を抑えています。
 
 ---
 
@@ -99,9 +130,17 @@ NetlifyとGitHubリポジトリが連携済みで、`main`ブランチへのpush
 | ----------------- | --------------- |
 | ビルドコマンド    | `npm run build` |
 | 公開ディレクトリ  | `dist`          |
-| Node.jsバージョン | `24.21.0`       |
+| Node.jsバージョン | `24.22.2`       |
 
 ビルド設定、セキュリティヘッダー、キャッシュ設定は[netlify.toml](./netlify.toml)で管理しています。ビルド成果物の`dist/`はNetlify側で生成するためGit管理対象外です。
+
+### microCMSとの連携設定（初回のみ）
+
+1. NetlifyのSite configuration > Environment variablesに、`MICROCMS_DOMAIN`と`MICROCMS_API_KEY`を登録します。
+2. NetlifyのBuild hooksでフックURLを発行します。
+3. microCMSの各API設定 > Webhookで「Netlify」を選び、2で発行したURLを登録します（`top`、`about`、`projects`のすべて）。
+
+これで、CMSでコンテンツを公開すると自動で再ビルド・デプロイされます。
 
 ---
 
@@ -161,14 +200,16 @@ src/styles/
 
 ### デザイントークン
 
-| 項目               | 値                                       |
-| ------------------ | ---------------------------------------- |
-| 背景色             | `#ccccc5` / `oklch(84.32% 0.0096 106.6)` |
-| 文字色             | `#000000`                                |
-| 淡色（著作権表記） | 背景色の30%暗転にあたる`#8f8f8a`         |
-| 欧文フォント       | Roboto 400                               |
-| 和文フォント       | Noto Sans JP 400                         |
-| 基準ビューポート   | 393px（iPhone 16）から1440px（Desktop）  |
+| 項目                     | 値                                                           |
+| ------------------------ | ------------------------------------------------------------ |
+| 背景色                   | `#ededeb` / `oklch(94.55% 0.0027 106.5)`                     |
+| 文字色                   | `#000000`                                                    |
+| 淡色（写真クレジット）   | 背景色の30%暗転にあたる`#a6a6a5`                             |
+| 欧文フォント             | Roboto 400                                                   |
+| 和文フォント             | Noto Sans JP 400                                             |
+| 基準ビューポート         | 393px（iPhone 16）から1400px（Desktop）                      |
+| PCレイアウトへの切り替え | 64rem（1024px）以上                                          |
+| グリッド                 | PC 4カラム（236 : 218 : 375 : 451）、SP 2カラム（113 : 216） |
 
 フォントはAstroのFonts APIでセルフホストしており、外部CDNへのリクエストは発生しません。
 
@@ -224,7 +265,11 @@ Google Tag Managerの注入は[src/components/Analytics.astro](./src/components/
 ## 申し送り事項
 
 - InstagramのURLが未確定です。`src/data/site.ts`の`instagramUrl`が仮値のため、実アカウントURLへの差し替えが必要です。
-- 字間は暫定値です。Figmaの詳細指定を受領後、`src/styles/theme.css`の`--letter-spacing-*`を差し替えてください。
-- AboutページはPC（`docs/design/about-pc.png`）とSP（`docs/design/about-sp.png`）でDOM構造が異なるため、`src/styles/project/about.css`の`min-width: 768px`の1箇所にのみメディアクエリを使用しています（mFLOCSSのPC/SP別DOM分岐ルールに基づく例外）。段落の改行位置はFigmaの実データ幅に対して近似値のため、詳細指定を受領後に`.p-about__content`の`max-inline-size`を調整してください。
-- 著作権表記の配色（`#8f8f8a`と`#ccccc5`の組み合わせ）はコントラスト比が約2.0対1で、WCAG 2.1 AAの4.5対1を満たしません。デザイン意図を優先して実装しています。準拠が必要な場合は`--color-text-muted`を調整してください。
+- 文字サイズ・字間・余白はデザインPNGの実測から逆算した値です。Figmaの詳細指定を受領後、`src/styles/tokens.css`と`src/styles/theme.css`を差し替えてください。
+- PC/SPの切り替え幅（64rem）は、CSSの各メディアクエリ、`src/data/media.ts`の`PC_MEDIA_QUERY`、`src/scripts/slideshow.ts`の3箇所で一致させています。変更時はすべて更新してください。
+- Aboutの写真はPCで本文にホバー（キーボード操作時はフォーカス）したときだけ表示します。ホバーできない端末でPCレイアウトになった場合（大型タブレットなど）は常時表示します。SPでは表示しません。
+- Project詳細（PC）は、プロフィールを`position: sticky`でファーストビューの位置に固定し、写真だけをスクロールさせています。概要（キャプション）は左カラムの氏名と揃えた位置から始まり、エリア全体が画面の縦中央に来たところで固定されます。概要の高さは本文量で変わるため、[src/scripts/project-caption.ts](./src/scripts/project-caption.ts)がResizeObserverで計測してCSSへ渡しています（スクロールイベントは使っていません）。1枚目の写真は縦中央から`--project-lead-shift`だけ下げた位置から始まります。
+- Projects一覧（PC）は、一覧の上端を画面の高さの32.4%（`--projects-list-start`。カンプの980px高で約318px）の位置に置いています。画面が低く一覧がフッターに重なる場合は、自動で上に詰めます。
+- Projects一覧のサムネイルはPCで項目にホバー（キーボード操作時はフォーカス）したときだけ表示します。SPとホバーできない端末では表示しません。サムネイルの上端は一覧の上端（1件目）に揃えています。一覧が画面より長くなっても、サムネイルは画面に固定せず一覧と一緒にスクロールします。
+- 写真クレジットの配色（`#a6a6a5`と`#ededeb`の組み合わせ）はコントラスト比が約2.1対1で、WCAG 2.1 AAの4.5対1を満たしません。デザイン意図を優先して実装しています。準拠が必要な場合は`--color-text-muted`を調整してください。
 - Noto Sans JPは`@font-face`定義が125件あり、日本語ページのHTMLをgzip後で約32KB増やします。Aboutのデザイン確定時に、使用文字だけをサブセット化したwoff2のセルフホストへ切り替えることを推奨します。

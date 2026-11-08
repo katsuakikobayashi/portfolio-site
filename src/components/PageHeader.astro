@@ -1,0 +1,33 @@
+---
+import { ROUTES, SITE } from '@/data/site'
+import type { Locale } from '@/i18n/config'
+import { localizePath } from '@/i18n/utils'
+
+/**
+ * SP 下層ページ上部のページヘッダー「Katsuaki Kobayashi - {label}」。
+ * 氏名は TOP へのリンクにする。PC では各ページの CSS で非表示にし、代わりに Profile を表示する。
+ *
+ * @prop {Locale} locale - 表示ロケール
+ * @prop {string} label - 氏名の後ろに付けるページ名（例: 'About'）
+ * @prop {string} class - 配置・表示切り替え用の追加クラス
+ */
+interface Props {
+  locale: Locale
+  label: string
+  class?: string
+}
+
+const { locale, label, class: className } = Astro.props
+---
+
+<header class:list={['l-page__header', 'p-page-header', className]}>
+  <p class="p-page-header__title">
+    <a class="p-page-header__home" href={localizePath(ROUTES.top, locale)}>
+      {SITE.name}
+    </a>
+    <span class="p-page-header__sep" aria-hidden="true">
+      -
+    </span>
+    <span>{label}</span>
+  </p>
+</header>

@@ -35,6 +35,11 @@ export default defineConfig({
     schema: {
       // 計測タグの拡張ポイント。未設定時は計測スクリプトを一切出力しない。
       PUBLIC_GTM_ID: envField.string({ context: 'client', access: 'public', optional: true }),
+      // microCMS。ビルド時（本番）/ リクエスト時（ローカル dev）にサーバー側でのみ参照する。
+      // API キーはクライアントバンドルに含めないよう secret として宣言する。
+      MICROCMS_API_KEY: envField.string({ context: 'server', access: 'secret' }),
+      // サービスドメイン（`xxx`）またはサービス URL（`https://xxx.microcms.io/`）のどちらでも可
+      MICROCMS_DOMAIN: envField.string({ context: 'server', access: 'secret' }),
     },
   },
   fonts: [

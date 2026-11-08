@@ -1,0 +1,49 @@
+---
+import ProjectsView, { type ProjectListItem } from '@/components/ProjectsView.astro'
+import SiteFooter from '@/components/SiteFooter.astro'
+import { PROJECT_THUMBNAIL } from '@/data/media'
+import type { Locale } from '@/i18n/config'
+import { useTranslations } from '@/i18n/ui'
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import { getProjects } from '@/lib/microcms'
+import { buildResponsiveImage } from '@/lib/microcms/image'
+import { toProjectPath } from '@/lib/project'
+
+/**
+ * Projects 一覧ページ（ja / en 共通）。microCMS `projects` を公開日の新しい順に取得してビューへ渡す。
+ * サムネイルはホバー時にのみ表示する補助的な要素のため preload しない。
+ *
+ * @prop {Locale} locale - 表示ロケール
+ */
+interface Props {
+  locale: Locale
+}
+
+const { locale } = Astro.props
+const t = useTranslations(locale)
+const projects = await getProjects()
+
+const items: ProjectListItem[] = projects.map((project) => ({
+  id: project.id,
+  title: project.title,
+  year: project.year,
+  description: project.description,
+  href: toProjectPath(project.slug, locale),
+  thumbnail:
+    project.thumbnail &&
+    buildResponsiveImage(
+      project.thumbnail,
+      PROJECT_THUMBNAIL.displayWidth,
+      PROJECT_THUMBNAIL.sizes
+    ),
+}))
+---
+
+<BaseLayout
+  locale={locale}
+  title={`${t('nav.projects')} | ${t('meta.title')}`}
+  description={t('meta.description')}
+>
+  <ProjectsView locale={locale} items={items} />
+  <SiteFooter locale={locale} pathname={Astro.url.pathname} current="projects" />
+</BaseLayout>

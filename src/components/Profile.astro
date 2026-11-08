@@ -1,0 +1,40 @@
+---
+import { ROUTES, SITE } from '@/data/site'
+import type { Locale } from '@/i18n/config'
+import { useTranslations } from '@/i18n/ui'
+import { localizePath } from '@/i18n/utils'
+
+/**
+ * 氏名・肩書き・分野のプロフィールブロック（全ページ共通の左カラム）。
+ *
+ * @prop {Locale} locale - 表示ロケール
+ * @prop {boolean} isPageHeading - TOP のように、このブロックがページの主見出しを担うか。
+ *   true のとき氏名を h1・肩書きを h2 とし、false のとき（About など本文側に h1 がある
+ *   ページ）は見出し階層を汚さないよう p とし、氏名を TOP へのリンクにする。
+ * @prop {string} class - 配置用の追加クラス
+ */
+interface Props {
+  locale: Locale
+  isPageHeading?: boolean
+  class?: string
+}
+
+const { locale, isPageHeading = false, class: className } = Astro.props
+const t = useTranslations(locale)
+const NameTag = isPageHeading ? 'h1' : 'p'
+const RoleTag = isPageHeading ? 'h2' : 'p'
+---
+
+<header class:list={['p-profile', className]}>
+  <NameTag class="p-profile__name">
+    {isPageHeading ? (
+      SITE.name
+    ) : (
+      <a class="p-profile__home-link" href={localizePath(ROUTES.top, locale)}>
+        {SITE.name}
+      </a>
+    )}
+  </NameTag>
+  <RoleTag class="p-profile__role">{t('top.role')}</RoleTag>
+  <p class="p-profile__disciplines">{t('top.disciplines')}</p>
+</header>

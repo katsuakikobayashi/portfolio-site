@@ -1,92 +1,75 @@
 ---
-import AboutContent from '@/components/AboutContent.astro'
-import EmailLink from '@/components/EmailLink.astro'
-import LangSwitch from '@/components/LangSwitch.astro'
-import { SITE } from '@/data/site'
+import PageHeader from '@/components/PageHeader.astro'
+import Profile from '@/components/Profile.astro'
 import type { Locale } from '@/i18n/config'
 import { useTranslations } from '@/i18n/ui'
-import { localizePath } from '@/i18n/utils'
+import type { ResponsiveImage } from '@/lib/microcms/image'
 
 /**
  * About ページ本体。
  *
- * デザインカンプ（docs/design/about-pc.png / about-sp.png）は PC と SP で
- * 見出し・肩書き・Contact セクションの有無が異なる別構成のため、
- * mFLOCSS の PC/SP 別 DOM 分岐ルールに従い `__pc` / `__sp` の対となる
- * 2 つの DOM をそれぞれ用意し、CSS（about.css）側の 1 箇所のみに置く
- * メディアクエリで表示を切り替える。
+ * PC: 左カラムにプロフィール、第 3 カラムに本文、第 4 カラムに写真。
+ *     写真は常時は出さず、本文にホバー（またはフォーカス）したときだけ表示する。
+ * SP: 上部にページヘッダー「Katsuaki Kobayashi - About」、本文のみ（写真なし）。
+ *
+ * PC のプロフィールと SP のページヘッダーは内容の異なる別 DOM のため、
+ * mFLOCSS の PC/SP 別 DOM 分岐ルールに従い `--pc` / `--sp` の対で命名する。
+ *
+ * @prop {Locale} locale - 表示ロケール
+ * @prop {string} name - 氏名（CMS: name / nameEn）
+ * @prop {string[][]} paragraphs - 本文（CMS: text / textEn を段落・行に分割済み）
+ * @prop {ResponsiveImage} photo - 写真（CMS: image）
+ * @prop {string} photoCaption - 写真クレジット（CMS: imageCaption）
  */
 interface Props {
   locale: Locale
-  pathname: string
+  name: string
+  paragraphs: string[][]
+  photo?: ResponsiveImage | undefined
+  photoCaption?: string | undefined
 }
 
-const { locale, pathname } = Astro.props
+const { locale, name, paragraphs, photo, photoCaption } = Astro.props
 const t = useTranslations(locale)
-const topPath = localizePath('', locale)
 ---
 
-<main class="l-page__main p-about">
-  <div class="p-about__grid p-about__grid--pc">
-    <div class="p-about__recap">
-      <p class="p-top__name p-about__recap-name">{SITE.name}</p>
+<PageHeader
+  class="p-about__identity p-about__identity--sp"
+  locale={locale}
+  label={t('nav.about')}
+/>
 
-      <div class="p-top__block p-top__block--profile">
-        <h2 class="p-top__heading">{t('top.role')}</h2>
-        <p class="p-top__disciplines">{t('top.disciplines')}</p>
-      </div>
+<main class="l-page__main l-grid p-about">
+  <Profile class="p-about__identity p-about__identity--pc" locale={locale} />
 
-      <nav
-        class="p-top__block p-top__block--nav p-about__breadcrumb"
-        aria-label={t('a11y.pageNav')}
-      >
-        <a class="c-link p-top__nav-link" href={topPath}>
-          {t('nav.home')}
-        </a>
-        <span class="p-about__breadcrumb-sep" aria-hidden="true">
-          /
-        </span>
-        <span class="p-top__nav-link" aria-current="page">
-          {t('nav.about')}
-        </span>
-      </nav>
+  <article class="p-about__article">
+    <h1 class="p-about__name">{name}</h1>
+    {paragraphs.map((lines) => (
+      <p class="p-about__paragraph">
+        {lines.map((line, i) => (
+          <Fragment>
+            {i > 0 && <br />}
+            {line}
+          </Fragment>
+        ))}
+      </p>
+    ))}
+  </article>
 
-      <section class="p-top__block p-top__block--contact">
-        <h2 class="p-top__heading">{t('contact.heading')}</h2>
-        <ul class="p-top__contact-list">
-          <li>
-            <EmailLink email={SITE.email} copiedLabel={t('contact.copied')} />
-          </li>
-          <li>
-            <a class="c-link" href={SITE.instagramUrl} target="_blank" rel="noopener noreferrer">
-              {t('contact.instagram')}
-            </a>
-          </li>
-        </ul>
-      </section>
-
-      <LangSwitch class="p-top__block p-top__block--language" locale={locale} pathname={pathname} />
-    </div>
-
-    <div class="p-about__content">
-      <AboutContent locale={locale} />
-    </div>
-  </div>
-
-  <div class="p-about__grid p-about__grid--sp">
-    <nav class="p-about__back" aria-label={t('a11y.pageNav')}>
-      <a class="c-link p-about__back-link" href={topPath}>
-        <span class="p-about__back-arrow" aria-hidden="true">
-          ←
-        </span>
-        {t('nav.home')}
-      </a>
-    </nav>
-
-    <div class="p-about__content">
-      <AboutContent locale={locale} />
-    </div>
-
-    <LangSwitch class="p-about__language-sp" locale={locale} pathname={pathname} />
-  </div>
+  {photo && (
+    <figure class="p-about__photo">
+      <img
+        class="p-about__photo-image"
+        src={photo.src}
+        srcset={photo.srcset}
+        sizes={photo.sizes}
+        width={photo.width}
+        height={photo.height}
+        alt={t('about.photoAlt')}
+        loading="lazy"
+        decoding="async"
+      />
+      {photoCaption && <figcaption class="p-about__photo-caption">{photoCaption}</figcaption>}
+    </figure>
+  )}
 </main>

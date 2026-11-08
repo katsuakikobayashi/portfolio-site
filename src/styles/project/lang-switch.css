@@ -2,18 +2,16 @@
  * Project 層: 言語スイッチ（jp / en）。
  */
 @layer project {
+  /* 文字サイズは配置先（フッター）から継承する */
   .p-lang-switch__list {
     display: flex;
     align-items: baseline;
-    font-size: var(--font-size-body);
-    letter-spacing: var(--letter-spacing-body);
-    line-height: var(--line-height-single);
   }
 
   /* 区切りの " / " は装飾要素のため疑似要素で描画し、DOM から読み上げさせない */
   .p-lang-switch__item + .p-lang-switch__item::before {
     content: '/';
-    margin-inline: 0.4em;
+    margin-inline: var(--spacing-inline-arrow);
   }
 
   .p-lang-switch__link {

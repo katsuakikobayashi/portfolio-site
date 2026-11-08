@@ -1,0 +1,79 @@
+---
+import PageHeader from '@/components/PageHeader.astro'
+import Profile from '@/components/Profile.astro'
+import type { Locale } from '@/i18n/config'
+import { useTranslations } from '@/i18n/ui'
+import type { ResponsiveImage } from '@/lib/microcms/image'
+
+/** 一覧の 1 項目 */
+export interface ProjectListItem {
+  id: string
+  title: string
+  year: string
+  description: string
+  href: string
+  thumbnail?: ResponsiveImage | undefined
+}
+
+/**
+ * Projects 一覧ページ本体（公開日の新しい順）。
+ *
+ * PC: 左カラムにプロフィール、第 3 カラムに一覧、第 4 カラムにサムネイル（上端を一覧の上端に揃える）。
+ *     サムネイルは常時は出さず、項目にホバー（キーボード操作時はフォーカス）したときだけ表示する。
+ *     .p-projects__body は一覧の上下に余白を配分して縦位置を決めるための枠。
+ * SP: 上部にページヘッダー「Katsuaki Kobayashi - List」、一覧のみ（サムネイルなし）。
+ *
+ * PC のプロフィールと SP のページヘッダーは別 DOM のため `--pc` / `--sp` の対で命名する。
+ *
+ * @prop {Locale} locale - 表示ロケール
+ * @prop {ProjectListItem[]} items - 一覧の項目（microCMS `projects` を変換済み）
+ */
+interface Props {
+  locale: Locale
+  items: ProjectListItem[]
+}
+
+const { locale, items } = Astro.props
+const t = useTranslations(locale)
+---
+
+<PageHeader
+  class="p-projects__identity p-projects__identity--sp"
+  locale={locale}
+  label={t('projects.headerLabel')}
+/>
+
+<main class="l-page__main l-grid p-projects">
+  <Profile class="p-projects__identity p-projects__identity--pc" locale={locale} />
+  <h1 class="u-visually-hidden">{t('nav.projects')}</h1>
+
+  <div class="p-projects__body">
+    <ol class="p-projects__list">
+      {items.map((item) => (
+        <li class="p-projects__item">
+          <article class="p-projects__card">
+            <a class="p-projects__link" href={item.href}>
+              <h2 class="p-projects__title">{item.title}</h2>
+              {item.year && <p class="p-projects__year">{item.year}</p>}
+              {item.description && <p class="p-projects__description">{item.description}</p>}
+            </a>
+            {item.thumbnail && (
+              // タイトルと同じ内容を補う装飾的なプレビューのため、代替テキストは空にする
+              <img
+                class="p-projects__thumbnail"
+                src={item.thumbnail.src}
+                srcset={item.thumbnail.srcset}
+                sizes={item.thumbnail.sizes}
+                width={item.thumbnail.width}
+                height={item.thumbnail.height}
+                alt=""
+                loading="lazy"
+                decoding="async"
+              />
+            )}
+          </article>
+        </li>
+      ))}
+    </ol>
+  </div>
+</main>

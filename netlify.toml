@@ -3,7 +3,7 @@
   publish = "dist"
 
 [build.environment]
-  NODE_VERSION = "24.21.0"
+  NODE_VERSION = "24.22.0"
   NPM_FLAGS = "--no-audit --no-fund"
 
 [[headers]]
@@ -14,8 +14,9 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "camera=(), microphone=(), geolocation=(), interest-cohort=()"
     Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
-    # 現状 JS は 0 バイト。GTM/GA4 を有効化する際は script-src に配信元を追加すること。
-    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; form-action 'none'; frame-ancestors 'none'; base-uri 'self'"
+    # GTM/GA4 を有効化する際は script-src に配信元を追加すること。
+    # img-src の images.microcms-assets.io は microCMS 画像 API（TOP スライド・About 写真）の配信元。
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.microcms-assets.io; font-src 'self'; form-action 'none'; frame-ancestors 'none'; base-uri 'self'"
 
 # ハッシュ付きで出力されるビルド成果物は不変のため長期キャッシュ
 [[headers]]

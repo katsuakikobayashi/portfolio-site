@@ -16,6 +16,7 @@ blob-report/
 .env
 .env.local
 .env.*.local
+.env.example
 
 # editor / OS
 .claude/

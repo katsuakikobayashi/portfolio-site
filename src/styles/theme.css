@@ -17,46 +17,66 @@
     /* ---------------------------------------------------------------
      * 色
      * ------------------------------------------------------------- */
-    --color-bg: var(--color-sand-300);
+    --color-bg: var(--color-gray-100);
     --color-text: var(--color-black);
-    /* 地色を 30% 暗転した淡色。デザイン指定の #8f8f8a と一致する */
+    /* 地色を 30% 暗転した淡色（写真クレジット等）。カンプの実測値と一致する */
     --color-text-muted: color-mix(in srgb, var(--color-bg) 70%, var(--color-black));
+    /* 地色を 50% 暗転した中間色（Projects の説明・概要）。カンプの実測値と一致する */
+    --color-text-subtle: color-mix(in srgb, var(--color-bg) 50%, var(--color-black));
     --color-focus: var(--color-black);
+    /* CMS リッチテキストのカスタムクラス付きテキスト（淡色の本文中で黒 100% にする） */
+    --color-text-emphasis: var(--color-black);
 
     /* ---------------------------------------------------------------
      * 文字サイズ（役割ベース）
      * ------------------------------------------------------------- */
-    --font-size-title: var(--size-text-16-20); /* サイトタイトル */
-    --font-size-label: var(--size-text-13-16); /* 見出し・主要導線 */
-    --font-size-body: var(--size-text-11-13); /* 本文・リンク */
-    --font-size-fine: var(--size-text-10-12); /* コピーライト */
+    --font-size-title: var(--size-text-15-17); /* 氏名 */
+    --font-size-label: var(--size-text-12-13); /* 肩書き・フッターナビ */
+    --font-size-body: var(--size-text-11-12); /* 本文・リンク */
+    --font-size-header: var(--size-text-13); /* SP ページヘッダー */
+    --font-size-fine: var(--size-text-10); /* 写真クレジット・Project 詳細の概要 */
+    --font-size-note: var(--size-text-11); /* Projects 一覧の説明（PC / SP 共通） */
 
     /* ---------------------------------------------------------------
-     * 字間
-     * デザイン PNG の実測から逆算した暫定値。Figma の指定値を受領後、
-     * ここだけを差し替えれば全画面に反映される。
+     * 字間（カンプの文字列幅の実測から逆算）
      * ------------------------------------------------------------- */
-    --letter-spacing-title: 0.21em;
-    --letter-spacing-label: 0.16em;
-    --letter-spacing-body: 0.16em;
-    --letter-spacing-fine: 0.16em;
+    --letter-spacing-title: 0.14em;
+    --letter-spacing-label: 0.08em;
+    --letter-spacing-body: 0.1em;
+    --letter-spacing-fine: 0.1em;
+    --letter-spacing-caption: 0.16em; /* Project 詳細の概要 */
+    /* 和文は全角の字幅が広いため、カンプの行長（「…主軸に、」まで 1 行）に合わせて別値を持つ */
+    --letter-spacing-title-ja: 0.26em;
+    --letter-spacing-prose-ja: var(--size-tracking-0-1-0-66);
 
     /* ---------------------------------------------------------------
      * 行間
      * ------------------------------------------------------------- */
     --line-height-single: 1; /* 1 行で完結するラベル類 */
     --line-height-base: 1.5;
-    --line-height-prose: 1.9; /* 和文本文（About 用） */
+    --line-height-prose: 1.85; /* About 本文（PC 22px / SP 21px 送り） */
+    --line-height-loose: 2; /* Project 詳細の概要（10px / 20px 送り） */
 
     /* ---------------------------------------------------------------
      * 余白（役割ベース）
      * ------------------------------------------------------------- */
-    --spacing-2xs: var(--size-space-10-12); /* 連続するリンク間 */
-    --spacing-xs: var(--size-space-15-17); /* 見出しと補足行の間 */
-    --spacing-sm: var(--size-space-18-21); /* 見出しとリンク群の間 */
-    --spacing-md: var(--size-space-45-53); /* タイトルと次ブロックの間 */
-    --spacing-lg: var(--size-space-63-80); /* セクション間 */
-    --spacing-2lg: var(--size-space-88-100); /* 無関係なブロック間の大きな区切り（About） */
+    --spacing-caption: var(--size-space-8); /* 写真とクレジットの間 */
+    --spacing-list: var(--size-space-9); /* 縦に並ぶリンク間 */
+    --spacing-xs: var(--size-space-12-14); /* 肩書きと分野の間 */
+    --spacing-sm: var(--size-space-19); /* 見出しとリンク群の間（SP メニュー） */
+    --spacing-md: var(--size-space-23-30); /* 氏名と本文の間（About） */
+    --spacing-lg: var(--size-space-28-31); /* 氏名と肩書きの間 */
+    --spacing-xl: var(--size-space-44); /* SP メニューとフッター行の間 */
+    --spacing-media: var(--size-space-16); /* 縦に並ぶ写真の間（Project 詳細） */
+    --spacing-title-media: var(--size-space-17); /* タイトルと写真の間（Project 詳細 SP） */
+    --spacing-list-item: var(--size-space-86-106); /* Projects 一覧の項目間 */
+    /* 写真に重ねるフッター（Project 詳細）の、文字より上の地色の帯 */
+    --spacing-footer-band: var(--size-space-20-40);
+
+    /* 行内の要素間（文字サイズに追従させるため em で持つ） */
+    --spacing-inline-arrow: 0.6em; /* ラベルと矢印の間 */
+    --spacing-inline-item: 1.1em; /* 横並びリンクの間 */
+    --spacing-inline-group: 3em; /* 言語切り替えとコピーライトの間（PC） */
 
     /* ---------------------------------------------------------------
      * ページ余白
@@ -64,14 +84,53 @@
      * （layout.css 参照）。ここでは水平余白・フッター位置・低ビューポート
      * 時の安全マージンのみを扱う。
      * ------------------------------------------------------------- */
-    --page-inline: var(--size-space-28-100);
-    --page-block-safe: clamp(1.25rem, 2.8svh, 2.5rem);
-    --page-block-end: clamp(1.25rem, 2.8svh, 2.5rem);
+    --page-inline: var(--size-space-32-60);
+    --page-block-start: var(--size-space-32);
+    /* 低い画面でも本文がヘッダー / フッター行に重ならない最小の上下余白 */
+    --page-block-safe: calc(var(--page-block-end) + var(--size-space-44));
+    --page-block-end: var(--size-space-17-36);
+    /* 写真に重ねるフッター全体の高さ（帯 + 1 行 + 下余白）。site-footer.css の構成と一致させること */
+    --footer-overlay-block-size: calc(
+      var(--spacing-footer-band) + var(--font-size-label) + var(--page-block-end)
+    );
+
+    /* ---------------------------------------------------------------
+     * グリッド
+     * ------------------------------------------------------------- */
+    --grid-columns-pc: var(--grid-columns-4);
+    --grid-columns-sp: var(--grid-columns-2);
+    --media-aspect: var(--aspect-portrait);
+    --about-photo-inline-size: var(--grid-column-4-photo);
+    /* Projects 一覧（PC）のサムネイル。一覧（第 3 カラム）を基準に、幅と右端の位置を指定する */
+    --projects-thumbnail-inline-size: var(--grid-column-3-photo);
+    --projects-thumbnail-inset-inline-end: calc(var(--grid-column-3-to-end) * -1);
+    /* Projects 一覧（PC）: 一覧の上端の位置（画面の高さに対する比率。カンプ: 980px 高で上端 約 318px） */
+    --projects-list-start: var(--size-viewport-block-32-4);
+    --grid-columns-project-pc: var(--grid-columns-project);
+    --project-media-ratio-pc: var(--grid-project-media-ratio);
+    /* Project 詳細（PC）: 1 枚目の写真を縦中央からずらす量（下方向） */
+    --project-lead-shift: var(--size-viewport-block-10);
+
+    /*
+     * プロフィールブロック（氏名・肩書き・分野）の高さ。各行は line-height: 1 のため
+     * 文字サイズと行間の合計で求まる。profile.css の構成を変える場合は合わせて更新すること。
+     * Project 詳細で、プロフィールを画面の縦中央に置き、概要の初期位置を氏名に揃えるために使う。
+     */
+    --profile-block-size: calc(
+      var(--font-size-title) + var(--spacing-lg) + var(--font-size-label) + var(--spacing-xs) +
+        var(--font-size-body)
+    );
+
+    /* ---------------------------------------------------------------
+     * アイコン・操作領域
+     * ------------------------------------------------------------- */
+    --size-icon: var(--size-icon-11);
+    --size-touch-target: var(--size-touch-44);
 
     /* ---------------------------------------------------------------
      * 下線
      * ------------------------------------------------------------- */
     --underline-thickness: var(--size-hairline);
-    --underline-offset: 0.125em;
+    --underline-offset: 0.2em;
   }
 }

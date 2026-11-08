@@ -9,8 +9,13 @@
 @import url('./foundation.css');
 @import url('./layout.css');
 @import url('./component/link.css');
+@import url('./project/profile.css');
+@import url('./project/page-header.css');
+@import url('./project/slideshow.css');
 @import url('./project/top.css');
 @import url('./project/about.css');
+@import url('./project/projects.css');
+@import url('./project/project-detail.css');
 @import url('./project/lang-switch.css');
 @import url('./project/site-footer.css');
 @import url('./animation.css');

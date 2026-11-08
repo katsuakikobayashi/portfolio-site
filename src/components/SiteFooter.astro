@@ -1,11 +1,120 @@
 ---
-import { SITE, formatCopyright } from '@/data/site'
+import EmailLink from '@/components/EmailLink.astro'
+import LangSwitch from '@/components/LangSwitch.astro'
+import { ROUTES, SITE, formatCopyright, type RouteName } from '@/data/site'
+import type { Locale } from '@/i18n/config'
+import { useTranslations, type UiKey } from '@/i18n/ui'
+import { localizePath } from '@/i18n/utils'
 
-const copyright = formatCopyright(new Date().getFullYear(), SITE.name)
+/**
+ * サイト共通フッター（ページナビ・Contact・言語切り替え・コピーライト）。
+ *
+ * PC ではナビを常時 1 行で表示し、SP ではナビを「＋」ボタンで開閉するメニューにする。
+ * PC / SP で並びが変わるだけで内容は同一のため、DOM は 1 つに保ち
+ * （メールリンクの重複出力を避ける）、配置の切り替えは site-footer.css 側で行う。
+ *
+ * @prop {Locale} locale - 表示ロケール
+ * @prop {string} pathname - 現在のパス（言語切り替え先の算出に使用）
+ * @prop {RouteName} current - 現在のページ。該当リンクを取り消し線の非リンク表示にする。
+ *   Project 詳細のように一覧へ戻る導線を残したいページでは指定しない
+ * @prop {boolean} isOverlay - 写真の上に重ねて表示するか（Project 詳細）。
+ *   PC / SP とも画面下端に固定し、地色で背面の写真を隠す
+ */
+interface Props {
+  locale: Locale
+  pathname: string
+  current?: RouteName | undefined
+  isOverlay?: boolean
+}
+
+const { locale, pathname, current, isOverlay = false } = Astro.props
+const t = useTranslations(locale)
+const copyright = formatCopyright(new Date().getFullYear())
+const menuId = 'site-menu'
+
+/** フッターナビに並べるページ（表示順） */
+const PAGE_LINKS = [
+  { route: 'projects', labelKey: 'nav.projects' },
+  { route: 'about', labelKey: 'nav.about' },
+] as const satisfies readonly { route: RouteName; labelKey: UiKey }[]
+
+const pages = PAGE_LINKS.map(({ route, labelKey }) => ({
+  label: t(labelKey),
+  href: localizePath(ROUTES[route], locale),
+  isCurrent: route === current,
+}))
 ---
 
-<footer class="l-page__footer p-site-footer">
-  <p class="p-site-footer__copyright">
-    <small>{copyright}</small>
-  </p>
+<footer
+  class:list={[
+    'l-page__footer',
+    'p-site-footer',
+    isOverlay && 'p-site-footer--overlay',
+    'js-site-footer',
+  ]}
+>
+  <nav id={menuId} class="p-site-footer__nav" aria-label={t('a11y.siteNav')}>
+    <ul class="p-site-footer__pages">
+      {pages.map((page) => (
+        <li class="p-site-footer__page">
+          {page.isCurrent ? (
+            <span class="p-site-footer__link p-site-footer__link--current" aria-current="page">
+              <span class="p-site-footer__label">{page.label}</span>
+              <span class="p-site-footer__arrow" aria-hidden="true">
+                ←
+              </span>
+            </span>
+          ) : (
+            <a class="p-site-footer__link" href={page.href}>
+              <span class="p-site-footer__label">{page.label}</span>
+              <span class="p-site-footer__arrow" aria-hidden="true">
+                →
+              </span>
+            </a>
+          )}
+        </li>
+      ))}
+    </ul>
+
+    <section class="p-site-footer__contact" aria-labelledby="site-footer-contact">
+      <h2 id="site-footer-contact" class="p-site-footer__contact-heading">
+        {t('contact.heading')}
+        <span class="p-site-footer__arrow" aria-hidden="true">
+          →
+        </span>
+      </h2>
+      <ul class="p-site-footer__contact-list">
+        <li class="p-site-footer__contact-item">
+          <EmailLink email={SITE.email} copiedLabel={t('contact.copied')} />
+        </li>
+        <li class="p-site-footer__contact-item">
+          <a class="c-link" href={SITE.instagramUrl} target="_blank" rel="noopener noreferrer">
+            {t('contact.instagram')}
+          </a>
+        </li>
+      </ul>
+    </section>
+  </nav>
+
+  <div class="p-site-footer__meta">
+    <LangSwitch class="p-site-footer__lang" locale={locale} pathname={pathname} />
+    <p class="p-site-footer__copyright">
+      <small>{copyright}</small>
+    </p>
+  </div>
+
+  <button
+    type="button"
+    class="p-site-footer__toggle js-site-menu-toggle"
+    aria-expanded="false"
+    aria-controls={menuId}
+  >
+    <span class="u-visually-hidden">{t('a11y.menu')}</span>
+  </button>
 </footer>
+
+<script>
+  import { initSiteMenu } from '@/scripts/site-menu'
+
+  initSiteMenu()
+</script>

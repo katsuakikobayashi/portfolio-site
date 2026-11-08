@@ -1,0 +1,49 @@
+---
+import type { ResponsiveImage } from '@/lib/microcms/image'
+
+/**
+ * 写真を重ねて配置し、一定間隔でクロスフェードさせるスライドショー。
+ * 切り替えは opacity のみで行い、再レイアウトを発生させない（要件⑥）。
+ *
+ * 全画像を loading="lazy" にしているのは、SP では非表示（display: none）のため
+ * 一切ダウンロードさせないため。PC の 1 枚目は BaseLayout の preload（media 付き）で
+ * 先読みするので LCP は遅れない。
+ *
+ * @prop {ResponsiveImage[]} images - srcset 等を算出済みの画像
+ * @prop {string} alt - 各画像の代替テキスト（連番を付与する）
+ * @prop {string} class - 配置用の追加クラス
+ */
+interface Props {
+  images: ResponsiveImage[]
+  alt: string
+  class?: string
+}
+
+const { images, alt, class: className } = Astro.props
+---
+
+{images.length > 0 && (
+  <ul class:list={['p-slideshow', 'js-slideshow', className]}>
+    {images.map((image, i) => (
+      <li class:list={['p-slideshow__item', 'js-slideshow-item', i === 0 && 'is-active']}>
+        <img
+          class="p-slideshow__image"
+          src={image.src}
+          srcset={image.srcset}
+          sizes={image.sizes}
+          width={image.width}
+          height={image.height}
+          alt={images.length > 1 ? `${alt} ${i + 1}` : alt}
+          loading="lazy"
+          decoding="async"
+        />
+      </li>
+    ))}
+  </ul>
+)}
+
+<script>
+  import { initSlideshows } from '@/scripts/slideshow'
+
+  initSlideshows()
+</script>

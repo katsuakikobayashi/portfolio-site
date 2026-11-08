@@ -1,0 +1,17 @@
+---
+import type { GetStaticPaths } from 'astro'
+import { getProjects } from '@/lib/microcms'
+import { toProjectStaticPaths, type Project } from '@/lib/project'
+import ProjectPage from '@/templates/ProjectPage.astro'
+
+export const getStaticPaths = (async () =>
+  toProjectStaticPaths(await getProjects())) satisfies GetStaticPaths
+
+interface Props {
+  project: Project
+}
+
+const { project } = Astro.props
+---
+
+<ProjectPage locale="en" project={project} />

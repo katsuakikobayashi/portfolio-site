@@ -1,28 +1,38 @@
 /**
  * Layout 層: 位置と空間だけを制御する。色・フォントには触れない。
+ *
+ * PC への切り替え幅は 64rem（1024px）で全ファイル共通。
+ * CSS のメディアクエリではカスタムプロパティを使えないため、変更時は
+ * src/data/media.ts の PC_MEDIA_QUERY と src/scripts/slideshow.ts も合わせて更新すること。
  */
 @layer layout {
   /*
    * ページ全体の枠。
-   * main と footer を同じ 1 セル（ビューポート全高）に重ねて配置し、
-   * main はそのセル内で縦方向中央、footer は下端に独立して揃える。
-   * こうすることで footer の有無・高さに関わらず、メインコンテンツは
-   * 常にブラウザの高さそのものに対して中央になる。
+   * header / main / footer を同じ 1 セル（ビューポート全高）に重ねて配置し、
+   * main はそのセル内で縦方向中央、header は上端、footer は下端に独立して揃える。
+   * こうすることで header / footer の有無・高さに関わらず、メインコンテンツは
+   * 常にブラウザの高さそのものに対して中央になる（カンプの PC / SP 共通の配置）。
    */
   .l-page {
     display: grid;
     grid-template-rows: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     min-block-size: 100svh;
     padding-inline: var(--page-inline);
   }
 
+  .l-page__header {
+    grid-area: 1 / 1;
+    align-self: start;
+    padding-block-start: var(--page-block-start);
+  }
+
   .l-page__main {
     grid-area: 1 / 1;
-    display: flex;
-    flex-direction: column;
-    align-items: start;
-    justify-content: center;
-    /* 極端に低い画面でコンテンツが端に張り付かないための最小余白 */
+    /* セルいっぱいに広げると、重なったヘッダーのリンクを覆ってタップできなくなるため、
+       中身の高さのまま縦中央に置く */
+    align-self: center;
+    /* 低い画面でコンテンツがヘッダー / フッターに重ならないための上下余白 */
     padding-block: var(--page-block-safe);
   }
 
@@ -32,10 +42,26 @@
     padding-block-end: var(--page-block-end);
   }
 
-  /* 縦方向にブロックを積み上げる際の共通コンテナ */
-  .l-stack {
-    display: flex;
-    flex-direction: column;
-    align-items: start;
+  /*
+   * カンプのカラムグリッド。
+   * SP は 2 カラム（主にフッター用）、PC は 4 カラム。
+   * 子要素は既定で全幅に広げ、PC でのみ各ページの project 層がカラムを指定する。
+   */
+  .l-grid {
+    display: grid;
+    grid-template-columns: var(--grid-columns-sp);
+    align-content: center;
+    align-items: center;
+  }
+
+  .l-grid > * {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  @media (width >= 64rem) {
+    .l-grid {
+      grid-template-columns: var(--grid-columns-pc);
+    }
   }
 }

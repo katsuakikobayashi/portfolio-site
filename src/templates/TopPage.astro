@@ -1,0 +1,43 @@
+---
+import SiteFooter from '@/components/SiteFooter.astro'
+import TopView from '@/components/TopView.astro'
+import { PC_MEDIA_QUERY, TOP_SLIDE } from '@/data/media'
+import type { Locale } from '@/i18n/config'
+import { useTranslations } from '@/i18n/ui'
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import { getContent } from '@/lib/microcms'
+import { buildResponsiveImage } from '@/lib/microcms/image'
+
+/**
+ * TOP ページ（ja / en 共通）。microCMS `top` を取得してビューへ渡す。
+ *
+ * @prop {Locale} locale - 表示ロケール
+ */
+interface Props {
+  locale: Locale
+}
+
+const { locale } = Astro.props
+const t = useTranslations(locale)
+const top = await getContent('top')
+const slides = top.slideImages.map((image) =>
+  buildResponsiveImage(image, TOP_SLIDE.displayWidth, TOP_SLIDE.sizes)
+)
+const [firstSlide] = slides
+---
+
+<BaseLayout
+  locale={locale}
+  title={t('meta.title')}
+  description={t('meta.description')}
+  preloadImage={
+    firstSlide && {
+      srcset: firstSlide.srcset,
+      sizes: firstSlide.sizes,
+      media: PC_MEDIA_QUERY,
+    }
+  }
+>
+  <TopView locale={locale} slides={slides} />
+  <SiteFooter locale={locale} pathname={Astro.url.pathname} current="top" />
+</BaseLayout>
