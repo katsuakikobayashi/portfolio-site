@@ -65,7 +65,7 @@ const pages = PAGE_LINKS.map(({ route, labelKey }) => ({
               </span>
             </span>
           ) : (
-            <a class="p-site-footer__link" href={page.href}>
+            <a class="p-site-footer__link c-touch-target" href={page.href}>
               <span class="p-site-footer__label">{page.label}</span>
               <span class="p-site-footer__arrow" aria-hidden="true">
                 →
@@ -85,10 +85,19 @@ const pages = PAGE_LINKS.map(({ route, labelKey }) => ({
       </h2>
       <ul class="p-site-footer__contact-list">
         <li class="p-site-footer__contact-item">
-          <EmailLink email={SITE.email} copiedLabel={t('contact.copied')} />
+          <EmailLink
+            class="p-site-footer__contact-link c-touch-target"
+            email={SITE.email}
+            copiedLabel={t('contact.copied')}
+          />
         </li>
         <li class="p-site-footer__contact-item">
-          <a class="c-link" href={SITE.instagramUrl} target="_blank" rel="noopener noreferrer">
+          <a
+            class="p-site-footer__contact-link c-link c-touch-target"
+            href={SITE.instagramUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             {t('contact.instagram')}
           </a>
         </li>

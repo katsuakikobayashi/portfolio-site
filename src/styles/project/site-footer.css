@@ -85,6 +85,15 @@
     font-size: var(--font-size-body);
   }
 
+  /*
+   * SP ではメールと instagram が狭い間隔（--spacing-list）で縦に並ぶ。
+   * タップ領域を既定の大きさまで広げると互いに重なり、隣のリンクが反応してしまうため、
+   * 上下には間隔の半分ずつだけ広げて、境目をちょうど間隔の中央にする。
+   */
+  .p-site-footer__contact-link {
+    --touch-target-block-size: calc(100% + var(--spacing-list));
+  }
+
   /* ---------------------------------------------------------------
    * 言語切り替え・コピーライト
    * ------------------------------------------------------------- */
@@ -210,6 +219,11 @@
 
     .p-site-footer__contact .c-link {
       text-decoration-line: none;
+    }
+
+    /* PC では横並びで上下に隣接するリンクがないため、既定のタップ領域に戻す */
+    .p-site-footer__contact-link {
+      --touch-target-block-size: var(--size-touch-target);
     }
 
     .p-site-footer__meta {

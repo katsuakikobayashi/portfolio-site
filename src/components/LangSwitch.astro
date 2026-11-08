@@ -23,7 +23,7 @@ const t = useTranslations(locale)
           </span>
         ) : (
           <a
-            class="p-lang-switch__link"
+            class="p-lang-switch__link c-touch-target"
             href={getAlternatePath(pathname, target)}
             hreflang={HTML_LANG[target]}
             lang={HTML_LANG[target]}

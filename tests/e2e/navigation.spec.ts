@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { isPcViewport, openMenuIfCollapsed } from './helpers'
+import { getLinkHrefAtPoint, isPcViewport, openMenuIfCollapsed } from './helpers'
 
 test.describe('言語切り替え', () => {
   test('日本語 TOP では jp が現在地として非リンク表示になる', async ({ page }) => {
@@ -116,5 +116,85 @@ test.describe('PC フッターナビ', () => {
     await page.goto('/')
     await expect(page.getByRole('button', { name: 'メニュー' })).toBeHidden()
     await expect(page.getByRole('navigation', { name: 'サイト内' })).toBeVisible()
+  })
+})
+
+test.describe('SP タップ領域', () => {
+  /*
+   * 文字の上下端からタップ位置までの距離（px）。
+   * タップ領域は 44px 四方まで広げており、文字（約 14px）の上下に約 15px ずつ余裕があるため、
+   * その内側で「文字から外れているが領域内」の位置を指す
+   */
+  const OUTSIDE_TEXT_OFFSET = 10
+  /*
+   * メールと instagram の間隔（9px）の半分より内側の距離（px）。
+   * 間隔の中央が両リンクの境目になるため、それぞれの側に収まる位置を指す
+   */
+  const CONTACT_GAP_OFFSET = 3
+
+  test.beforeEach(async ({ page }) => {
+    test.skip(isPcViewport(page), 'SP のみの仕様')
+  })
+
+  test('言語切り替えは文字の少し上をタップしても切り替わる', async ({ page }) => {
+    await page.goto('/')
+    const box = await page
+      .getByRole('navigation', { name: '言語切り替え' })
+      .getByRole('link')
+      .boundingBox()
+    expect(box).not.toBeNull()
+    if (!box) {
+      return
+    }
+
+    await page.touchscreen.tap(box.x + box.width / 2, box.y - OUTSIDE_TEXT_OFFSET)
+    await expect(page).toHaveURL(/\/en\/$/)
+  })
+
+  test('フッターメニューのページリンクは文字の少し上下をタップしても反応する', async ({ page }) => {
+    await page.goto('/')
+    await openMenuIfCollapsed(page)
+    const link = page.getByRole('navigation', { name: 'サイト内' }).getByRole('link', {
+      name: 'Projects',
+    })
+    const box = await link.boundingBox()
+    expect(box).not.toBeNull()
+    if (!box) {
+      return
+    }
+
+    const href = await link.getAttribute('href')
+    const centerX = box.x + box.width / 2
+    expect(await getLinkHrefAtPoint(page, centerX, box.y - OUTSIDE_TEXT_OFFSET)).toBe(href)
+    expect(await getLinkHrefAtPoint(page, centerX, box.y + box.height + OUTSIDE_TEXT_OFFSET)).toBe(
+      href
+    )
+
+    await page.touchscreen.tap(centerX, box.y - OUTSIDE_TEXT_OFFSET)
+    await expect(page).toHaveURL(/\/projects\/$/)
+  })
+
+  test('メールと instagram は隣り合うリンクの領域と重ならない', async ({ page }) => {
+    await page.goto('/')
+    await openMenuIfCollapsed(page)
+    const email = page.locator('.js-email-link')
+    const instagram = page.getByRole('link', { name: 'instagram' })
+    const [emailBox, instagramBox] = await Promise.all([
+      email.boundingBox(),
+      instagram.boundingBox(),
+    ])
+    expect(emailBox).not.toBeNull()
+    expect(instagramBox).not.toBeNull()
+    if (!emailBox || !instagramBox) {
+      return
+    }
+
+    const centerX = instagramBox.x + instagramBox.width / 2
+    expect(
+      await getLinkHrefAtPoint(page, centerX, emailBox.y + emailBox.height + CONTACT_GAP_OFFSET)
+    ).toBe(await email.getAttribute('href'))
+    expect(await getLinkHrefAtPoint(page, centerX, instagramBox.y - CONTACT_GAP_OFFSET)).toBe(
+      await instagram.getAttribute('href')
+    )
   })
 })

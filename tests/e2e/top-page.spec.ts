@@ -101,15 +101,16 @@ test.describe('TOP スライドショー', () => {
     await expect(preload).toHaveAttribute('imagesrcset', /fm=webp/)
   })
 
-  test('画像は WebP・DPR 別画質の srcset と寸法を持つ', async ({ page }) => {
+  test('画像は WebP・幅別画質の srcset と寸法を持つ', async ({ page }) => {
     await page.goto('/')
     const image = page.locator('.p-slideshow__image').first()
     await expect(image).toHaveAttribute('width', /\d+/)
     await expect(image).toHaveAttribute('height', /\d+/)
     const srcset = (await image.getAttribute('srcset')) ?? ''
     expect(srcset).toContain('fm=webp')
-    expect(srcset).toMatch(/dpr=1&q=80 \d+w/)
-    expect(srcset).toMatch(/dpr=2&q=60 \d+w/)
+    // 候補幅が表示幅の 1x 付近なら高画質、2x 付近なら画質を下げる
+    expect(srcset).toMatch(/w=\d+&q=80 \d+w/)
+    expect(srcset).toMatch(/w=\d+&q=60 \d+w/)
   })
 
   test('PC では表示され、1 枚目が表示中になる', async ({ page }) => {

@@ -22,3 +22,18 @@ export const openMenuIfCollapsed = async (page: Page): Promise<void> => {
  * @returns {boolean} PC レイアウトなら true
  */
 export const isPcViewport = (page: Page): boolean => (page.viewportSize()?.width ?? 0) >= 1024
+
+/**
+ * @function getLinkHrefAtPoint
+ * @description 画面上の座標をタップしたときに反応するリンク（座標の最前面にある要素を含む a 要素）の href を返す
+ * @param {Page} page - 対象ページ
+ * @param {number} x - ビューポート左端からの X 座標（px）
+ * @param {number} y - ビューポート上端からの Y 座標（px）
+ * @returns {Promise<string | null>} 反応するリンクの href。リンクがなければ null
+ */
+export const getLinkHrefAtPoint = (page: Page, x: number, y: number): Promise<string | null> =>
+  page.evaluate(
+    ([pointX, pointY]) =>
+      document.elementFromPoint(pointX, pointY)?.closest('a')?.getAttribute('href') ?? null,
+    [x, y] as const
+  )
