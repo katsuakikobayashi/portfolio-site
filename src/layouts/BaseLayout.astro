@@ -119,5 +119,9 @@ const personJsonLd = {
   </head>
   <body class="l-page">
     <slot />
+    <script>
+      // 全ページの JS を 1 ファイルにまとめて読み込む（理由は main.ts を参照）
+      import '@/scripts/main'
+    </script>
   </body>
 </html>

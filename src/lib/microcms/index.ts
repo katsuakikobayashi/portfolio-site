@@ -1,7 +1,7 @@
 import { MICROCMS_API_KEY, MICROCMS_DOMAIN } from 'astro:env/server'
 import { toProjects, type Project } from '@/lib/project'
-import { createMicrocmsClient, type MicrocmsQuery } from './client'
-import type { MicrocmsEndpoint, MicrocmsEndpoints, ProjectContent } from './types'
+import { createMicrocmsClient, fetchAllProjectContents, type MicrocmsQuery } from './client'
+import type { MicrocmsEndpoint, MicrocmsEndpoints } from './types'
 
 export type { AboutContent, MicrocmsImage, ProjectContent, TopContent } from './types'
 
@@ -57,35 +57,11 @@ export const getContent = <E extends MicrocmsEndpoint>(
   return request
 }
 
-/** microCMS リスト形式 API の 1 リクエストあたりの最大取得件数 */
-const LIST_LIMIT_MAX = 100
-
-/** Projects は公開日の新しい順に並べる（デザイン指定） */
-const PROJECTS_ORDER = '-publishedAt'
-
-/**
- * @function getAllProjectContents
- * @description microCMS `projects` の全件を公開日の新しい順に取得する。
- *              1 リクエストの上限（100 件）を超える場合は、残りを offset 指定で並列に取得して連結する。
- * @returns {Promise<ProjectContent[]>} 全件のコンテンツ
- */
-const getAllProjectContents = async (): Promise<ProjectContent[]> => {
-  const query = { orders: PROJECTS_ORDER, limit: String(LIST_LIMIT_MAX) }
-  const first = await getContent('projects', query)
-  const restOffsets = Array.from(
-    { length: Math.max(0, Math.ceil(first.totalCount / LIST_LIMIT_MAX) - 1) },
-    (_, i) => (i + 1) * LIST_LIMIT_MAX
-  )
-  const rest = await Promise.all(
-    restOffsets.map((offset) => getContent('projects', { ...query, offset: String(offset) }))
-  )
-  return [first, ...rest].flatMap((page) => page.contents)
-}
-
 /**
  * @function getProjects
  * @description Projects の全件を取得し、ページ用の形に変換する（公開日の新しい順）
  * @returns {Promise<Project[]>} ページ用のプロジェクト一覧
  * @throws {Error} url が不正・重複している場合（ビルドを止める）
  */
-export const getProjects = async (): Promise<Project[]> => toProjects(await getAllProjectContents())
+export const getProjects = async (): Promise<Project[]> =>
+  toProjects(await fetchAllProjectContents(getContent))

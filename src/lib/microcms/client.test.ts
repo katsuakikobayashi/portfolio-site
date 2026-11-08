@@ -1,5 +1,11 @@
 import { describe, expect, it, vi } from 'vitest'
-import { createMicrocmsClient, resolveMicrocmsBaseUrl, type FetchLike } from './client'
+import {
+  LIST_LIMIT_MAX,
+  createMicrocmsClient,
+  fetchAllProjectContents,
+  resolveMicrocmsBaseUrl,
+  type FetchLike,
+} from './client'
 
 describe('resolveMicrocmsBaseUrl', () => {
   it('サービスドメインのみの指定からベース URL を組み立てる', () => {
@@ -64,5 +70,41 @@ describe('createMicrocmsClient', () => {
 
   it('API キーが空の場合は生成時にエラーにする', () => {
     expect(() => createMicrocmsClient({ ...config, apiKey: ' ' })).toThrow('MICROCMS_API_KEY')
+  })
+})
+
+describe('fetchAllProjectContents', () => {
+  const config = { serviceDomain: 'example', apiKey: 'test-key' }
+
+  /**
+   * @function respondByOffset
+   * @description offset ごとに 1 件ずつ返すリスト API のモックを作る
+   * @param {number} totalCount - 全件数
+   * @returns {FetchLike} モックの fetch
+   */
+  const respondByOffset =
+    (totalCount: number): FetchLike =>
+    (input) => {
+      const offset = new URL(input).searchParams.get('offset') ?? '0'
+      return Promise.resolve(Response.json({ contents: [{ id: offset }], totalCount }))
+    }
+
+  it('上限件数以内なら 1 リクエストで取得する', async () => {
+    const fetchFn = vi.fn<FetchLike>(respondByOffset(1))
+    const contents = await fetchAllProjectContents(createMicrocmsClient(config, fetchFn).get)
+    expect(contents).toEqual([{ id: '0' }])
+    expect(fetchFn).toHaveBeenCalledTimes(1)
+  })
+
+  it('上限件数を超える場合は offset を指定して残りを取得し、順番どおりに連結する', async () => {
+    const fetchFn = vi.fn<FetchLike>(respondByOffset(LIST_LIMIT_MAX * 2 + 1))
+    const contents = await fetchAllProjectContents(createMicrocmsClient(config, fetchFn).get)
+    expect(contents).toEqual([
+      { id: '0' },
+      { id: String(LIST_LIMIT_MAX) },
+      { id: String(LIST_LIMIT_MAX * 2) },
+    ])
+    const [firstUrl] = fetchFn.mock.calls[0] ?? []
+    expect(new URL(firstUrl ?? '').searchParams.get('orders')).toBe('-publishedAt')
   })
 })

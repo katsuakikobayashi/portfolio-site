@@ -5,7 +5,7 @@ import type { Locale } from './config'
  * About の氏名・本文・写真は microCMS（エンドポイント `about`）、
  * Projects の内容は microCMS（エンドポイント `projects`）で管理する。
  */
-const dictionary = {
+export const dictionary = {
   ja: {
     'meta.title': 'Katsuaki Kobayashi',
     'meta.description': 'Designer based in Tokyo, Japan',
