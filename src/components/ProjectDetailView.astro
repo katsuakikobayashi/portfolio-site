@@ -5,6 +5,7 @@ import ResponsivePicture from '@/components/ResponsivePicture.astro'
 import type { Locale } from '@/i18n/config'
 import { useTranslations } from '@/i18n/ui'
 import type { ResponsiveImage } from '@/lib/microcms/image'
+import { PROJECT_RATIO_PROPERTY, toMediaRatio } from '@/lib/page-content'
 import type { RichTextParagraph } from '@/lib/rich-text'
 
 /**
@@ -39,13 +40,11 @@ const t = useTranslations(locale)
 /**
  * 1 枚目・最後の写真の縦横比（高さ / 幅）。
  * CSS 側でファーストビューと最終スクロール位置の写真を画面の縦中央に揃えるために渡す。
- * 写真の比率は CMS の画像ごとに異なり CSS だけでは知り得ないため、ここで算出する。
+ * 下書きプレビュー（scripts/preview/project.ts）も同じ変数名で設定するため、変更時は合わせること。
  */
-const toRatio = (image: ResponsiveImage | undefined): number =>
-  image ? image.height / image.width : 1
 const mediaStyle = [
-  `--project-lead-ratio: ${toRatio(images.at(0))}`,
-  `--project-last-ratio: ${toRatio(images.at(-1))}`,
+  `${PROJECT_RATIO_PROPERTY.lead}: ${toMediaRatio(images.at(0))}`,
+  `${PROJECT_RATIO_PROPERTY.last}: ${toMediaRatio(images.at(-1))}`,
 ].join('; ')
 ---
 

@@ -1,5 +1,6 @@
 import { initEmailCopyLinks } from './email-link'
 import { initProjectCaption } from './project-caption'
+import { PREVIEW_STATUS_SELECTOR } from './preview/selector'
 import { initSiteMenu } from './site-menu'
 import { initSlideshows } from './slideshow'
 
@@ -17,3 +18,10 @@ initSiteMenu()
 initEmailCopyLinks()
 initSlideshows()
 initProjectCaption()
+
+// 下書きプレビュー（/preview/）のページでのみ、プレビューのスクリプトを別ファイルとして読み込む。
+// API キーを含むため公開ページの JS には入れない。静的 import にすると、プレビューと共通の
+// モジュール（slideshow 等）が別チャンクに切り出され、公開ページのリクエストが増えるため動的 import にする。
+if (document.querySelector(PREVIEW_STATUS_SELECTOR) !== null) {
+  void import('./preview')
+}

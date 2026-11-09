@@ -2,6 +2,7 @@
 import { defineConfig, envField, fontProviders } from 'astro/config'
 import { existsSync } from 'node:fs'
 import sitemap from '@astrojs/sitemap'
+import { PREVIEW_ROUTE } from './src/data/site.ts'
 import { fetchSiteGlyphs } from './src/lib/font-glyphs.ts'
 import { scriptPriority } from './src/integrations/script-priority.ts'
 
@@ -60,6 +61,16 @@ export default defineConfig({
       MICROCMS_API_KEY: envField.string({ context: 'server', access: 'secret' }),
       // サービスドメイン（`xxx`）またはサービス URL（`https://xxx.microcms.io/`）のどちらでも可
       MICROCMS_DOMAIN: envField.string({ context: 'server', access: 'secret' }),
+      // 下書きプレビュー（/preview/）でブラウザから microCMS を呼ぶための API キー。
+      // ブラウザ向けの JS に埋め込まれ公開されるため public として宣言する（プレビューのページでのみ読み込む）。
+      // 運用判断により、既定では MICROCMS_API_KEY と同じキーを使う。GET 権限のみに絞った専用キーへ
+      // 切り替える場合は、この環境変数を設定するだけでよい（コードの変更は不要）。
+      PUBLIC_MICROCMS_PREVIEW_API_KEY: envField.string({
+        context: 'client',
+        access: 'public',
+        optional: true,
+        default: process.env.MICROCMS_API_KEY ?? '',
+      }),
     },
   },
   fonts: [
@@ -89,6 +100,8 @@ export default defineConfig({
     // module script の取得優先度を下げ、クリティカルリクエストチェーンから外す（理由は同ファイル参照）
     scriptPriority(),
     sitemap({
+      // 下書きプレビュー（/preview/・/en/preview/）は公開ページではないため載せない
+      filter: (page) => !new URL(page).pathname.split('/').includes(PREVIEW_ROUTE),
       i18n: {
         defaultLocale: 'ja',
         locales: {

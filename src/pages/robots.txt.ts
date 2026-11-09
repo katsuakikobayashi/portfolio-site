@@ -1,4 +1,10 @@
 import type { APIRoute } from 'astro'
+import { PREVIEW_ROUTE } from '@/data/site'
+import { LOCALES } from '@/i18n/config'
+import { localizePath } from '@/i18n/utils'
+
+/** 下書きプレビューのパス（ロケールごと。例: '/preview/', '/en/preview/'） */
+const PREVIEW_PATHS = LOCALES.map((locale) => localizePath(PREVIEW_ROUTE, locale))
 
 /**
  * @function GET
@@ -8,7 +14,9 @@ import type { APIRoute } from 'astro'
  */
 export const GET: APIRoute = ({ site }) => {
   const sitemapUrl = new URL('sitemap-index.xml', site).href
-  const body = `User-agent: *\nAllow: /\n\nSitemap: ${sitemapUrl}\n`
+  // 下書きプレビューは draftKey が無いと表示されないが、クロール自体も不要なため除外する
+  const disallow = PREVIEW_PATHS.map((path) => `Disallow: ${path}\n`).join('')
+  const body = `User-agent: *\nAllow: /\n${disallow}\nSitemap: ${sitemapUrl}\n`
 
   return new Response(body, {
     headers: { 'Content-Type': 'text/plain; charset=utf-8' },

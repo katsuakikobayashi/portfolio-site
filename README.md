@@ -55,13 +55,16 @@ npm install
 cp .env.example .env
 ```
 
-| 変数名             | 必須 | 内容                                                                               |
-| ------------------ | ---- | ---------------------------------------------------------------------------------- |
-| `MICROCMS_DOMAIN`  | ○    | microCMSのサービスドメイン（`xxx`）またはサービスURL（`https://xxx.microcms.io/`） |
-| `MICROCMS_API_KEY` | ○    | microCMSのAPIキー。GET権限のみのキーを使用すること                                 |
-| `PUBLIC_GTM_ID`    |      | Google Tag ManagerのコンテナID                                                     |
+| 変数名                            | 必須 | 内容                                                                               |
+| --------------------------------- | ---- | ---------------------------------------------------------------------------------- |
+| `MICROCMS_DOMAIN`                 | ○    | microCMSのサービスドメイン（`xxx`）またはサービスURL（`https://xxx.microcms.io/`） |
+| `MICROCMS_API_KEY`                | ○    | microCMSのAPIキー。GET権限のみのキーを使用すること                                 |
+| `PUBLIC_MICROCMS_PREVIEW_API_KEY` |      | 下書きプレビュー用のAPIキー。未設定時は`MICROCMS_API_KEY`と同じ値を使う            |
+| `PUBLIC_GTM_ID`                   |      | Google Tag ManagerのコンテナID                                                     |
 
-microCMSの2つの値はサーバー側（ビルド時）だけで参照し、ブラウザに配信されるJavaScriptには含まれません。未設定のままビルドするとエラーで停止します。
+`MICROCMS_DOMAIN`と`MICROCMS_API_KEY`はビルド時に参照します。未設定のままビルドするとエラーで停止します。
+
+下書きプレビュー（後述）はブラウザからmicroCMSを呼び出すため、`PUBLIC_MICROCMS_PREVIEW_API_KEY`の値（未設定時は`MICROCMS_API_KEY`の値）がプレビューページ専用のJavaScriptに含まれ、公開されます。公開ページのJavaScriptには含まれません。
 
 `PUBLIC_GTM_ID`が未設定のときは計測スクリプトを一切出力しません。設定した場合は`netlify.toml`のContent-Security-Policyの`script-src`に`https://www.googletagmanager.com`を追加する必要があります。
 
@@ -90,18 +93,19 @@ microCMSの2つの値はサーバー側（ビルド時）だけで参照し、�
 
 ## サイト構成
 
-| パス                  | 言語    | 内容                                   |
-| --------------------- | ------- | -------------------------------------- |
-| `/`                   | 日本語  | TOP                                    |
-| `/en/`                | English | TOP                                    |
-| `/about/`             | 日本語  | About                                  |
-| `/en/about/`          | English | About                                  |
-| `/projects/`          | 日本語  | Projects一覧（公開日の新しい順）       |
-| `/en/projects/`       | English | Projects一覧（公開日の新しい順）       |
-| `/projects/{url}/`    | 日本語  | Project詳細（`{url}`はCMSの`url`の値） |
-| `/en/projects/{url}/` | English | Project詳細（`{url}`はCMSの`url`の値） |
+| パス                        | 言語            | 内容                                                |
+| --------------------------- | --------------- | --------------------------------------------------- |
+| `/`                         | 日本語          | TOP                                                 |
+| `/en/`                      | English         | TOP                                                 |
+| `/about/`                   | 日本語          | About                                               |
+| `/en/about/`                | English         | About                                               |
+| `/projects/`                | 日本語          | Projects一覧（公開日の新しい順）                    |
+| `/en/projects/`             | English         | Projects一覧（公開日の新しい順）                    |
+| `/projects/{url}/`          | 日本語          | Project詳細（`{url}`はCMSの`url`の値）              |
+| `/en/projects/{url}/`       | English         | Project詳細（`{url}`はCMSの`url`の値）              |
+| `/preview/`・`/en/preview/` | 日本語・English | 下書きプレビュー（TOP / About / Project詳細。後述） |
 
-言語切り替えは静的リンクのみで実装しています。JavaScriptはメールアドレスのコピー、SPメニューの開閉、TOPのスライドショー、Project詳細の概要エリアの高さ計測にのみ使用しています。
+言語切り替えは静的リンクのみで実装しています。JavaScriptはメールアドレスのコピー、SPメニューの開閉、TOPのスライドショー、Project詳細の概要エリアの高さ計測、下書きプレビューにのみ使用しています。
 
 ---
 
@@ -119,6 +123,39 @@ microCMSの2つの値はサーバー側（ビルド時）だけで参照し、�
 - Projectsの本文（`body` / `bodyEn`）はリッチテキストです。段落・改行と、カスタムクラス付きの範囲（黒100%で表示）だけを解釈し、それ以外の装飾（リンク・太字など）は文字だけを表示します（[src/lib/rich-text.ts](./src/lib/rich-text.ts)）。HTMLをそのまま埋め込まないため、サニタイズライブラリは使っていません。`bodyEn`が空の場合は`body`を表示します。
 - 取得タイミング: `npm run build`（本番）はビルド時に1回だけ取得します。`npm run dev`（ローカル）はページを開くたびに取得するため、CMSの変更がリロードで反映されます。
 - 画像はmicroCMSの画像APIで配信します（[src/lib/microcms/image.ts](./src/lib/microcms/image.ts)）。形式はWebP（`fm=webp`）に統一し、DPR 1x・2x・3xの候補を`srcset`に並べます。画質（`q`）はDPR 1xで80、2xで60、3xで45です。高DPR端末では画素が細かく圧縮ノイズが目立たないため、解像度を上げる分だけ画質を下げて転送量を抑えています。
+
+---
+
+## 下書きプレビュー（microCMS）
+
+microCMSの下書きを、本番ドメインで公開前に確認できます。対象はTOP / About / Project詳細の3画面（日本語・英語）です。
+
+ページ自体は静的に出力し、ブラウザのJavaScriptがURLの`draftKey`（Projectは`contentId`も）を使ってmicroCMSから下書きを取得して描画します（[src/scripts/preview/](./src/scripts/preview/)）。描画の構造と文字・画像の変換は公開ページと共通です（[src/lib/page-content.ts](./src/lib/page-content.ts)）。
+
+### 設定（初回のみ）
+
+microCMSの各API設定 > 画面プレビューに、次のURLを登録します（英語版で確認したい場合は`/preview/`を`/en/preview/`にします）。
+
+| API        | 画面プレビューのURL                                                                               |
+| ---------- | ------------------------------------------------------------------------------------------------- |
+| `top`      | `https://www.katsuakikobayashi.com/preview/?draftKey={DRAFT_KEY}`                                 |
+| `about`    | `https://www.katsuakikobayashi.com/preview/about/?draftKey={DRAFT_KEY}`                           |
+| `projects` | `https://www.katsuakikobayashi.com/preview/projects/?contentId={CONTENT_ID}&draftKey={DRAFT_KEY}` |
+
+### 動作
+
+- 画面右上に状態（読み込み中・下書きプレビュー・エラー）を表示します。
+- クエリなしで直接アクセスした場合や、値の形式が不正な場合は、公開中のページへ移動します（TOP→`/`、About→`/about/`、Project→`/projects/`。英語版は`/en/`付き）。JavaScriptが無効な場合も同じページへ移動します。
+- 言語切り替え（JP / EN）のリンクには`draftKey`などを引き継ぐため、同じ下書きを日英で確認できます。
+- `noindex`（meta・`X-Robots-Tag`）、robots.txtの`Disallow`、sitemapからの除外により、検索エンジンには載せません。
+
+### 注意点
+
+- **APIキーの公開**: プレビュー用のJavaScriptにAPIキーが含まれ、誰でも取得できる状態になります。キーの権限は必ず`top`・`about`・`projects`のGETのみにし、「全下書きの取得」やPOST・PUT・PATCH・DELETEを付けないでください。第三者がこのキーでAPIを呼び出し、microCMSのAPIリクエスト数・転送量の枠を消費するおそれがあります。キーを分けたくなった場合は、GET権限のみの専用キーを発行して`PUBLIC_MICROCMS_PREVIEW_API_KEY`に設定し、再ビルドしてください（コードの変更は不要です）。
+- **draftKeyが誤っている・期限切れの場合**: microCMSはエラーを返さず、公開中の内容を返します。そのため、プレビューに公開中の内容が表示されたときは、管理画面のプレビューボタンからURLを開き直してください。Projectで`contentId`が存在しない場合は「下書きが見つかりません」と表示します。
+- **和文フォント**: 和文フォント（Noto Sans JP）は、ビルド時点のCMSの文字だけを含むよう生成しています（[src/lib/font-glyphs.ts](./src/lib/font-glyphs.ts)）。下書きで新しく追加した漢字などは、プレビューでのみ代替フォントで表示されます。公開後の再ビルドで解消します。
+- **meta情報**: プレビューのmeta description・OGPは公開用の内容を反映しません（`noindex`のページのため）。Project詳細の`<title>`のみ下書きのタイトルに更新します。
+- **CSP**: ブラウザからAPIを呼ぶため、[netlify.toml](./netlify.toml)のContent-Security-Policyに`connect-src 'self' https://*.microcms.io`を追加しています。
 
 ---
 

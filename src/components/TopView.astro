@@ -2,25 +2,23 @@
 import Profile from '@/components/Profile.astro'
 import Slideshow from '@/components/Slideshow.astro'
 import type { Locale } from '@/i18n/config'
-import { useTranslations } from '@/i18n/ui'
-import type { ResponsiveImage } from '@/lib/microcms/image'
+import type { TopSlide } from '@/lib/page-content'
 
 /**
  * TOP ページ本体。左カラムにプロフィール、第 3 カラムに CMS のスライド写真（PC のみ）。
  *
  * @prop {Locale} locale - 表示ロケール
- * @prop {ResponsiveImage[]} slides - microCMS `top.slideImages` を変換済みの画像
+ * @prop {TopSlide[]} slides - microCMS `top.sliderImages` を変換済みのスライド
  */
 interface Props {
   locale: Locale
-  slides: ResponsiveImage[]
+  slides: TopSlide[]
 }
 
 const { locale, slides } = Astro.props
-const t = useTranslations(locale)
 ---
 
 <main class="l-page__main l-grid p-top">
   <Profile class="p-top__profile" locale={locale} isPageHeading />
-  <Slideshow class="p-top__slideshow" images={slides} alt={t('top.slideAlt')} />
+  <Slideshow class="p-top__slideshow" slides={slides} />
 </main>

@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import {
   LIST_LIMIT_MAX,
+  MicrocmsHttpError,
   createMicrocmsClient,
   fetchAllProjectContents,
   resolveMicrocmsBaseUrl,
@@ -66,6 +67,43 @@ describe('createMicrocmsClient', () => {
     const fetchFn = vi.fn<FetchLike>().mockResolvedValue(new Response(null, { status: 401 }))
 
     await expect(createMicrocmsClient(config, fetchFn).get('top')).rejects.toThrow('top (401)')
+  })
+
+  it('HTTP エラーはステータスを保持した MicrocmsHttpError として投げる', async () => {
+    const fetchFn = vi.fn<FetchLike>().mockResolvedValue(new Response(null, { status: 404 }))
+
+    const error: unknown = await createMicrocmsClient(config, fetchFn)
+      .get('about')
+      .catch((reason: unknown) => reason)
+
+    expect(error).toBeInstanceOf(MicrocmsHttpError)
+    expect(error).toMatchObject({ status: 404 })
+  })
+
+  it('getListItem はコンテンツ ID をパスに付けて 1 件を取得する', async () => {
+    const body = { id: 'abc-123', title: 'Project' }
+    const fetchFn = vi.fn<FetchLike>().mockResolvedValue(Response.json(body))
+
+    const result = await createMicrocmsClient(config, fetchFn).getListItem('projects', 'abc-123', {
+      draftKey: 'draft_1',
+    })
+
+    expect(result).toEqual(body)
+    const [requested] = fetchFn.mock.calls[0] ?? []
+    const url = new URL(requested ?? '')
+    expect(url.pathname).toBe('/api/v1/projects/abc-123')
+    expect(url.searchParams.get('draftKey')).toBe('draft_1')
+  })
+
+  it('getListItem はコンテンツ ID をエンコードし、別のパスやクエリにしない', async () => {
+    const fetchFn = vi.fn<FetchLike>().mockResolvedValue(Response.json({}))
+
+    await createMicrocmsClient(config, fetchFn).getListItem('projects', 'a/b?x=1')
+
+    const [requested] = fetchFn.mock.calls[0] ?? []
+    const url = new URL(requested ?? '')
+    expect(url.pathname).toBe('/api/v1/projects/a%2Fb%3Fx%3D1')
+    expect(url.search).toBe('')
   })
 
   it('API キーが空の場合は生成時にエラーにする', () => {

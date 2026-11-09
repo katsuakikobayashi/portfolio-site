@@ -142,6 +142,19 @@ test.describe('TOP スライドショー', () => {
     await expect(page.locator('.p-slideshow__item').first()).toHaveClass(/is-active/)
   })
 
+  test('各スライドはプロジェクト詳細へのリンクで、表示中以外は操作できない', async ({ page }) => {
+    await page.goto('/')
+    const items = page.locator('.p-slideshow__item')
+    await expect(items.first().locator('.p-slideshow__link')).toHaveAttribute(
+      'href',
+      /^\/projects\/[\w-]+\/$/
+    )
+    await expect(items.first()).not.toHaveAttribute('inert')
+    if ((await items.count()) > 1) {
+      await expect(items.nth(1)).toHaveAttribute('inert', '')
+    }
+  })
+
   test('SP では表示せず、写真もダウンロードしない', async ({ page }) => {
     test.skip(isPcViewport(page), 'SP のみの仕様')
     const imageRequests: string[] = []

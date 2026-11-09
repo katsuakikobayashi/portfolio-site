@@ -28,7 +28,6 @@ describe('useTranslations', () => {
   it('全ロケールで画像の代替テキストと支援技術向けラベルが空でない', () => {
     for (const locale of LOCALES) {
       const t = useTranslations(locale)
-      expect(t('top.slideAlt').length).toBeGreaterThan(0)
       expect(t('about.photoAlt').length).toBeGreaterThan(0)
       expect(t('a11y.menu').length).toBeGreaterThan(0)
       expect(t('project.textLabel').length).toBeGreaterThan(0)

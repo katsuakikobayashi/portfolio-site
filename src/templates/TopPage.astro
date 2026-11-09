@@ -1,28 +1,29 @@
 ---
 import SiteFooter from '@/components/SiteFooter.astro'
 import TopView from '@/components/TopView.astro'
-import { PC_MEDIA_QUERY, TOP_SLIDE } from '@/data/media'
+import { PC_MEDIA_QUERY } from '@/data/media'
 import type { Locale } from '@/i18n/config'
 import { useTranslations } from '@/i18n/ui'
 import BaseLayout from '@/layouts/BaseLayout.astro'
 import { getContent } from '@/lib/microcms'
-import { buildResponsiveImage, getPreferredSource } from '@/lib/microcms/image'
+import { getPreferredSource } from '@/lib/microcms/image'
+import { toTopSlides } from '@/lib/page-content'
 
 /**
  * TOP ページ（ja / en 共通）。microCMS `top` を取得してビューへ渡す。
  *
  * @prop {Locale} locale - 表示ロケール
+ * @prop {boolean} isPreview - 下書きプレビュー（/preview/）として出力するか。
+ *   true の場合は CMS を取得せず空の状態で出力し、下書きはブラウザで取得して描画する
  */
 interface Props {
   locale: Locale
+  isPreview?: boolean
 }
 
-const { locale } = Astro.props
+const { locale, isPreview = false } = Astro.props
 const t = useTranslations(locale)
-const top = await getContent('top')
-const slides = top.slideImages.map((image) =>
-  buildResponsiveImage(image, TOP_SLIDE.displayWidth, TOP_SLIDE.sizes)
-)
+const slides = isPreview ? [] : toTopSlides(await getContent('top'), locale)
 const [firstSlide] = slides
 ---
 
@@ -30,10 +31,11 @@ const [firstSlide] = slides
   locale={locale}
   title={t('meta.title')}
   description={t('meta.description')}
+  previewPage={isPreview ? 'top' : undefined}
   preloadImage={
     firstSlide && {
-      ...getPreferredSource(firstSlide),
-      sizes: firstSlide.sizes,
+      ...getPreferredSource(firstSlide.image),
+      sizes: firstSlide.image.sizes,
       media: PC_MEDIA_QUERY,
     }
   }

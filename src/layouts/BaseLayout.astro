@@ -1,10 +1,12 @@
 ---
 import { Font } from 'astro:assets'
 import Analytics from '@/components/Analytics.astro'
+import PreviewLoader from '@/components/PreviewLoader.astro'
 import { SITE, parseDisciplines } from '@/data/site'
 import { HREF_LANG, HTML_LANG, LOCALES, OG_LOCALE, type Locale } from '@/i18n/config'
 import { useTranslations } from '@/i18n/ui'
 import { getAlternatePath } from '@/i18n/utils'
+import { toPreviewFallbackPath, type PreviewPage } from '@/lib/preview'
 import '@/styles/index.css'
 
 interface Props {
@@ -26,6 +28,11 @@ interface Props {
   preloadImage?: PreloadImage | undefined
   /** 検索エンジンにインデックスさせないページ（仮ページなど）で true にする */
   noindex?: boolean
+  /**
+   * microCMS の下書きプレビューとして出力する場合のページの種類。
+   * 指定時は noindex にし、下書きをブラウザで取得・描画するスクリプトを読み込む。
+   */
+  previewPage?: PreviewPage | undefined
 }
 
 interface PreloadImage {
@@ -42,6 +49,7 @@ const {
   withJapaneseFont = false,
   preloadImage,
   noindex = false,
+  previewPage,
 } = Astro.props
 const t = useTranslations(locale)
 
@@ -78,7 +86,17 @@ const personJsonLd = {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    {noindex && <meta name="robots" content="noindex" />}
+    {(noindex || previewPage) && <meta name="robots" content="noindex" />}
+    {previewPage && (
+      // JS 無効時は下書きを描画できないため、公開中のページへ移動させる
+      // （クエリの有無による出し分けは JS 側で行う。静的 HTML の meta refresh では判定できないため）
+      <noscript>
+        <meta
+          http-equiv="refresh"
+          content={`0; url=${toPreviewFallbackPath(previewPage, locale)}`}
+        />
+      </noscript>
+    )}
     <link rel="canonical" href={canonicalUrl.href} />
     {alternates.map((alternate) => (
       <link rel="alternate" hreflang={HREF_LANG[alternate.locale]} href={alternate.href} />
@@ -121,6 +139,7 @@ const personJsonLd = {
     <Analytics />
   </head>
   <body class="l-page">
+    {previewPage && <PreviewLoader locale={locale} page={previewPage} />}
     <slot />
     <script>
       // 全ページの JS を 1 ファイルにまとめて読み込む（理由は main.ts を参照）

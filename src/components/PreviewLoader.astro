@@ -1,0 +1,36 @@
+---
+import { MICROCMS_DOMAIN } from 'astro:env/server'
+import type { Locale } from '@/i18n/config'
+import { useTranslations } from '@/i18n/ui'
+import { resolveMicrocmsBaseUrl } from '@/lib/microcms/client'
+import type { PreviewPage } from '@/lib/preview'
+
+/**
+ * 下書きプレビューの状態表示（読み込み中・表示中・エラー）。
+ * BaseLayout の previewPage 指定時にのみ出力する（公開ページには 1 バイトも出さない）。
+ * この要素があるページでのみ、main.ts が下書きを取得・描画するスクリプト（scripts/preview/）を読み込む。
+ *
+ * スクリプトへ渡す値は data 属性で受け渡す。
+ * - data-preview-page: 描画するページの種類
+ * - data-microcms-origin: microCMS のサービス URL（ビルド時に MICROCMS_DOMAIN から算出）
+ *
+ * @prop {Locale} locale - 表示ロケール
+ * @prop {PreviewPage} page - プレビューのページの種類
+ */
+interface Props {
+  locale: Locale
+  page: PreviewPage
+}
+
+const { locale, page } = Astro.props
+const t = useTranslations(locale)
+---
+
+<p
+  class="p-preview-status js-preview-status"
+  role="status"
+  data-preview-page={page}
+  data-microcms-origin={resolveMicrocmsBaseUrl(MICROCMS_DOMAIN)}
+>
+  {t('preview.loading')}
+</p>

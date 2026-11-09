@@ -16,7 +16,19 @@
     Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
     # GTM/GA4 を有効化する際は script-src に配信元を追加すること。
     # img-src の images.microcms-assets.io は microCMS 画像 API（TOP スライド・About 写真）の配信元。
-    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.microcms-assets.io; font-src 'self'; form-action 'none'; frame-ancestors 'none'; base-uri 'self'"
+    # connect-src の *.microcms.io は、下書きプレビュー（/preview/）がブラウザから API を呼ぶための許可。
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.microcms-assets.io; connect-src 'self' https://*.microcms.io; font-src 'self'; form-action 'none'; frame-ancestors 'none'; base-uri 'self'"
+
+# 下書きプレビューは検索エンジンに載せない（HTML の meta robots に加えてヘッダーでも指定する）
+[[headers]]
+  for = "/preview/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow, noarchive"
+
+[[headers]]
+  for = "/en/preview/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow, noarchive"
 
 # ハッシュ付きで出力されるビルド成果物は不変のため長期キャッシュ
 [[headers]]

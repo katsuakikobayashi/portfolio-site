@@ -1,49 +1,43 @@
 ---
 import AboutView from '@/components/AboutView.astro'
 import SiteFooter from '@/components/SiteFooter.astro'
-import { ABOUT_PHOTO } from '@/data/media'
 import type { Locale } from '@/i18n/config'
 import { useTranslations } from '@/i18n/ui'
 import BaseLayout from '@/layouts/BaseLayout.astro'
 import { getContent } from '@/lib/microcms'
-import { buildResponsiveImage } from '@/lib/microcms/image'
-import { toDescription, toParagraphs } from '@/lib/text'
+import { EMPTY_ABOUT_VIEW, toAboutView } from '@/lib/page-content'
 
 /**
  * About ページ（ja / en 共通）。microCMS `about` を取得してビューへ渡す。
  * 写真はホバー時にのみ表示する補助的な要素のため preload しない。
  *
  * @prop {Locale} locale - 表示ロケール
+ * @prop {boolean} isPreview - 下書きプレビュー（/preview/about/）として出力するか。
+ *   true の場合は CMS を取得せず空の状態で出力し、下書きはブラウザで取得して描画する
  */
 interface Props {
   locale: Locale
+  isPreview?: boolean
 }
 
-const { locale } = Astro.props
+const { locale, isPreview = false } = Astro.props
 const t = useTranslations(locale)
-const about = await getContent('about')
-
-const isJa = locale === 'ja'
-const name = isJa ? about.name : about.nameEn
-const text = isJa ? about.text : about.textEn
-// 和文は行をそのまま連結し、欧文は単語が繋がらないよう空白で連結する
-const description = toDescription(text, isJa ? '' : ' ')
-const photo =
-  about.image && buildResponsiveImage(about.image, ABOUT_PHOTO.displayWidth, ABOUT_PHOTO.sizes)
+const view = isPreview ? EMPTY_ABOUT_VIEW : toAboutView(await getContent('about'), locale)
 ---
 
 <BaseLayout
   locale={locale}
   title={`${t('nav.about')} | ${t('meta.title')}`}
-  description={description}
-  withJapaneseFont={isJa}
+  description={view.description}
+  withJapaneseFont={locale === 'ja'}
+  previewPage={isPreview ? 'about' : undefined}
 >
   <AboutView
     locale={locale}
-    name={name}
-    paragraphs={toParagraphs(text)}
-    photo={photo}
-    photoCaption={about.imageCaption}
+    name={view.name}
+    paragraphs={view.paragraphs}
+    photo={view.photo}
+    photoCaption={view.photoCaption}
   />
   <SiteFooter locale={locale} pathname={Astro.url.pathname} current="about" />
 </BaseLayout>

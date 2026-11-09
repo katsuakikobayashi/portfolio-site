@@ -36,10 +36,19 @@ const setupSlideshow = (root: HTMLElement): void => {
   const playable = window.matchMedia(PLAYABLE_QUERY)
   const state = { index: 0, timerId: 0 }
 
+  /**
+   * 透明なスライドも同じ位置に重なっているため、表示中以外は inert にして
+   * クリックとフォーカスが見えないリンクに当たらないようにする
+   */
+  const setActive = (slide: HTMLElement | undefined, isActive: boolean): void => {
+    slide?.classList.toggle(ACTIVE_CLASS, isActive)
+    slide?.toggleAttribute('inert', !isActive)
+  }
+
   const showNext = (): void => {
     const next = getNextIndex(state.index, slides.length)
-    slides[state.index]?.classList.remove(ACTIVE_CLASS)
-    slides[next]?.classList.add(ACTIVE_CLASS)
+    setActive(slides[state.index], false)
+    setActive(slides[next], true)
     state.index = next
   }
 

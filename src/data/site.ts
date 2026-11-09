@@ -21,6 +21,12 @@ export const ROUTES = {
 export type RouteName = keyof typeof ROUTES
 
 /**
+ * microCMS の下書きプレビューのルート識別子（/preview/・/en/preview/）。
+ * 公開ページではないため ROUTES（ナビ）には含めず、robots.txt / sitemap.xml の除外に使う。
+ */
+export const PREVIEW_ROUTE = 'preview'
+
+/**
  * @function formatCopyright
  * @description フッターに表示するコピーライト表記を生成する
  * @param {number} year - 表示する年（ビルド時の西暦）

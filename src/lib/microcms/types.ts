@@ -18,9 +18,12 @@ export interface MicrocmsObjectMeta {
   revisedAt?: string
 }
 
-/** エンドポイント `top`（オブジェクト形式） */
+/**
+ * エンドポイント `top`（オブジェクト形式）。
+ * sliderImages は `projects` を参照する複数コンテンツ参照フィールドで、参照先の 1 件がそのまま入る。
+ */
 export interface TopContent extends MicrocmsObjectMeta {
-  slideImages: MicrocmsImage[]
+  sliderImages: ProjectContent[]
 }
 
 /** エンドポイント `about`（オブジェクト形式） */
@@ -70,3 +73,12 @@ export interface MicrocmsEndpoints {
 }
 
 export type MicrocmsEndpoint = keyof MicrocmsEndpoints
+
+/** リスト形式のエンドポイント名（例: 'projects'） */
+export type MicrocmsListEndpoint = {
+  [E in MicrocmsEndpoint]: MicrocmsEndpoints[E] extends MicrocmsListResponse<unknown> ? E : never
+}[MicrocmsEndpoint]
+
+/** リスト形式のエンドポイントのコンテンツ 1 件の型（例: 'projects' → ProjectContent） */
+export type MicrocmsListItem<E extends MicrocmsListEndpoint> =
+  MicrocmsEndpoints[E] extends MicrocmsListResponse<infer T> ? T : never

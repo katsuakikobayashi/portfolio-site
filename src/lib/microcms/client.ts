@@ -1,4 +1,10 @@
-import type { MicrocmsEndpoint, MicrocmsEndpoints, ProjectContent } from './types'
+import type {
+  MicrocmsEndpoint,
+  MicrocmsEndpoints,
+  MicrocmsListEndpoint,
+  MicrocmsListItem,
+  ProjectContent,
+} from './types'
 
 /** microCMS クライアントの接続設定 */
 export interface MicrocmsConfig {
@@ -18,6 +24,32 @@ export interface MicrocmsClient {
     endpoint: E,
     query?: MicrocmsQuery
   ) => Promise<MicrocmsEndpoints[E]>
+  /** リスト形式のエンドポイントからコンテンツ ID を指定して 1 件取得する（`/{endpoint}/{contentId}`） */
+  getListItem: <E extends MicrocmsListEndpoint>(
+    endpoint: E,
+    contentId: string,
+    query?: MicrocmsQuery
+  ) => Promise<MicrocmsListItem<E>>
+}
+
+/**
+ * microCMS が 2xx 以外を返したときのエラー。
+ * 下書きプレビューで「draftKey 違い・コンテンツなし（4xx）」と「障害（5xx 等）」を
+ * 呼び出し側で区別できるよう、HTTP ステータスを保持する。
+ */
+export class MicrocmsHttpError extends Error {
+  /** microCMS のレスポンスの HTTP ステータス */
+  readonly status: number
+
+  /**
+   * @param {string} resource - 取得対象（エラーメッセージ用。例: 'top', 'projects/xxx'）
+   * @param {number} status - HTTP ステータス
+   */
+  constructor(resource: string, status: number) {
+    super(`microCMS の取得に失敗しました: ${resource} (${status})`)
+    this.name = 'MicrocmsHttpError'
+    this.status = status
+  }
 }
 
 const API_VERSION_PATH = 'api/v1'
@@ -62,24 +94,39 @@ export const createMicrocmsClient = (
   }
   const baseUrl = resolveMicrocmsBaseUrl(config.serviceDomain)
 
+  /**
+   * @function request
+   * @description API を GET し、JSON を返す（get / getListItem の共通処理）
+   * @param {string} resource - `api/v1/` 以降のパス（エンコード済みであること）
+   * @param {MicrocmsQuery} query - クエリパラメータ
+   * @returns {Promise<unknown>} レスポンスの JSON
+   * @throws {MicrocmsHttpError} 2xx 以外の場合
+   */
+  const request = async (resource: string, query: MicrocmsQuery): Promise<unknown> => {
+    const url = new URL(`${baseUrl}/${API_VERSION_PATH}/${resource}`)
+    // URLSearchParams 経由で値をエンコードし、クエリ文字列の組み立てミスを防ぐ
+    Object.entries(query).forEach(([key, value]) => url.searchParams.set(key, value))
+    const response = await fetchFn(url.href, {
+      headers: { 'X-MICROCMS-API-KEY': config.apiKey },
+    })
+    if (!response.ok) {
+      // 取得失敗時に空のページを公開しないよう、ビルドごと失敗させる
+      throw new MicrocmsHttpError(resource, response.status)
+    }
+    return response.json()
+  }
+
   return {
-    get: async <E extends MicrocmsEndpoint>(
+    // レスポンス形状は管理画面のスキーマで保証される前提（types.ts と同期させること）
+    get: async <E extends MicrocmsEndpoint>(endpoint: E, query: MicrocmsQuery = {}) =>
+      (await request(endpoint, query)) as MicrocmsEndpoints[E],
+    getListItem: async <E extends MicrocmsListEndpoint>(
       endpoint: E,
+      contentId: string,
       query: MicrocmsQuery = {}
-    ): Promise<MicrocmsEndpoints[E]> => {
-      const url = new URL(`${baseUrl}/${API_VERSION_PATH}/${endpoint}`)
-      // URLSearchParams 経由で値をエンコードし、クエリ文字列の組み立てミスを防ぐ
-      Object.entries(query).forEach(([key, value]) => url.searchParams.set(key, value))
-      const response = await fetchFn(url.href, {
-        headers: { 'X-MICROCMS-API-KEY': config.apiKey },
-      })
-      if (!response.ok) {
-        // 取得失敗時に空のページを公開しないよう、ビルドごと失敗させる
-        throw new Error(`microCMS の取得に失敗しました: ${endpoint} (${response.status})`)
-      }
-      // レスポンス形状は管理画面のスキーマで保証される前提（types.ts と同期させること）
-      return (await response.json()) as MicrocmsEndpoints[E]
-    },
+    ) =>
+      // ID はパスに入るため、`/` や `?` で別のパス・クエリにならないようエンコードする
+      (await request(`${endpoint}/${encodeURIComponent(contentId)}`, query)) as MicrocmsListItem<E>,
   }
 }
 
