@@ -17,7 +17,10 @@
     # GTM/GA4 を有効化する際は script-src に配信元を追加すること。
     # img-src の images.microcms-assets.io は microCMS 画像 API（TOP スライド・About 写真）の配信元。
     # connect-src の *.microcms.io は、下書きプレビュー（/preview/）がブラウザから API を呼ぶための許可。
-    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.microcms-assets.io; connect-src 'self' https://*.microcms.io; font-src 'self'; form-action 'none'; frame-ancestors 'none'; base-uri 'self'"
+    # frame-src の app.netlify.com は、Deploy Preview に挿入される Netlify Drawer（iframe）を表示するための許可。
+    # netlify.toml のヘッダーはデプロイコンテキスト別に分けられないため、本番にも同じ値が付く。
+    # 本番では Drawer が挿入されず、許可先も Netlify 管理画面のみのため影響は小さい。
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.microcms-assets.io; connect-src 'self' https://*.microcms.io; font-src 'self'; frame-src 'self' https://app.netlify.com; form-action 'none'; frame-ancestors 'none'; base-uri 'self'"
 
 # 下書きプレビューは検索エンジンに載せない（HTML の meta robots に加えてヘッダーでも指定する）
 [[headers]]

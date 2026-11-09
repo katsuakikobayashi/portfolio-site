@@ -169,7 +169,7 @@ NetlifyとGitHubリポジトリが連携済みで、`main`ブランチへのpush
 | 公開ディレクトリ  | `dist`          |
 | Node.jsバージョン | `24.22.2`       |
 
-ビルド設定、セキュリティヘッダー、キャッシュ設定は[netlify.toml](./netlify.toml)で管理しています。ビルド成果物の`dist/`はNetlify側で生成するためGit管理対象外です。
+ビルド設定、セキュリティヘッダー、キャッシュ設定は[netlify.toml](./netlify.toml)で管理しています。Deploy PreviewでNetlify Drawer（レビュー用ツールバー）を表示するため、Content-Security-Policyに`frame-src 'self' https://app.netlify.com`を追加しています。ビルド成果物の`dist/`はNetlify側で生成するためGit管理対象外です。
 
 ### microCMSとの連携設定（初回のみ）
 
