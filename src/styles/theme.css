@@ -67,9 +67,15 @@
     --spacing-md: var(--size-space-23-30); /* 氏名と本文の間（About） */
     --spacing-lg: var(--size-space-28-31); /* 氏名と肩書きの間 */
     --spacing-xl: var(--size-space-44); /* SP メニューとフッター行の間 */
+    --spacing-menu-band: var(--size-space-8); /* SP メニューを開いたときの、文字より上の地色の帯 */
     --spacing-media: var(--size-space-16); /* 縦に並ぶ写真の間（Project 詳細） */
     --spacing-title-media: var(--size-space-17); /* タイトルと写真の間（Project 詳細 SP） */
     --spacing-list-item: var(--size-space-86-106); /* Projects 一覧の項目間 */
+    /*
+     * Project 詳細（SP）の本文末尾からページ下端まで。写真が画面幅に比例して伸縮するため、
+     * 余白も比例させてカンプ（393px 幅で 166px）の比率を保つ
+     */
+    --spacing-project-end: var(--size-space-166-sp-scale);
     /* 写真に重ねるフッター（Project 詳細）の、文字より上の地色の帯 */
     --spacing-footer-band: var(--size-space-20-40);
 

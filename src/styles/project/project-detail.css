@@ -20,7 +20,8 @@
     align-self: start;
     display: flex;
     flex-direction: column;
-    padding-block: 0 var(--page-block-safe);
+    /* 下端は固定フッターが重なるため、その高さを含めてカンプの余白を取る（PC では 0 に上書き） */
+    padding-block: 0 var(--spacing-project-end);
 
     /* 写真の表示幅（SP: コンテンツ全幅） */
     --project-media-inline-size: 100cqi;

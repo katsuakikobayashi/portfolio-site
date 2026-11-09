@@ -36,6 +36,14 @@
     animation: fade-in var(--duration-normal) var(--ease-out-cubic);
   }
 
+  /*
+   * 開いたメニューの上端と地色の端が揃うと、背面の本文と接して窮屈に見えるため帯を足す。
+   * 写真に重ねるフッターは既に --spacing-footer-band の帯があるので対象外
+   */
+  .p-site-footer.is-menu-open:not(.p-site-footer--overlay) {
+    padding-block-start: var(--spacing-menu-band);
+  }
+
   .p-site-footer__pages {
     grid-column: 1;
     display: flex;
@@ -170,6 +178,11 @@
     .p-site-footer {
       grid-template-columns: var(--grid-columns-pc);
       align-items: baseline;
+    }
+
+    /* PC はナビを常時 1 行表示するため、SP で開いたまま幅を広げても帯を付けない */
+    .p-site-footer.is-menu-open:not(.p-site-footer--overlay) {
+      padding-block-start: 0;
     }
 
     .p-site-footer__nav,
