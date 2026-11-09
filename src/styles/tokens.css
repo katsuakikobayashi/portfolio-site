@@ -50,12 +50,13 @@
      * タイポグラフィのプリミティブ値（min → max: px 相当）
      * ------------------------------------------------------------- */
     --size-text-10: calc(10 * var(--px));
+    --size-text-10-12: calc(10 * var(--px) + 2 * var(--fluid));
     --size-text-11: calc(11 * var(--px));
-    --size-text-11-12: calc(11 * var(--px) + 1 * var(--fluid));
     --size-text-12-13: calc(12 * var(--px) + 1 * var(--fluid));
+    --size-text-12-17: calc(12 * var(--px) + 5 * var(--fluid));
     --size-text-13: calc(13 * var(--px));
     --size-text-15-17: calc(15 * var(--px) + 2 * var(--fluid));
-    /* 和文本文の字間（SP 11px×0.01em ≒ 0.1px → PC 12px×0.055em ≒ 0.66px） */
+    /* 和文本文の字間（SP 10px×0.01em = 0.1px → PC 12px×0.055em ≒ 0.66px） */
     --size-tracking-0-1-0-66: calc(0.1 * var(--px) + 0.56 * var(--fluid));
 
     /* ---------------------------------------------------------------

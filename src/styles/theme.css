@@ -31,11 +31,15 @@
      * 文字サイズ（役割ベース）
      * ------------------------------------------------------------- */
     --font-size-title: var(--size-text-15-17); /* 氏名 */
+    /* About の氏名。デザイン指定により、他ページの氏名（15px〜）より小さい 12px から可変する */
+    --font-size-about-name: var(--size-text-12-17);
     --font-size-label: var(--size-text-12-13); /* 肩書き・フッターナビ */
-    --font-size-body: var(--size-text-11-12); /* 本文・リンク */
+    --font-size-body: var(--size-text-10-12); /* 本文・リンク */
     --font-size-header: var(--size-text-13); /* SP ページヘッダー */
     --font-size-fine: var(--size-text-10); /* 写真クレジット・Project 詳細の概要 */
     --font-size-note: var(--size-text-11); /* Projects 一覧の説明（PC / SP 共通） */
+    /* SP フッターの ©年（PC はフッターの文字サイズを継承） */
+    --font-size-copyright-sp: var(--size-text-10);
 
     /* ---------------------------------------------------------------
      * 字間（カンプの文字列幅の実測から逆算）
@@ -54,7 +58,7 @@
      * ------------------------------------------------------------- */
     --line-height-single: 1; /* 1 行で完結するラベル類 */
     --line-height-base: 1.5;
-    --line-height-prose: 1.85; /* About 本文（PC 22px / SP 21px 送り） */
+    --line-height-prose: 1.85; /* About 本文（PC 22px / SP 18.5px 送り） */
     --line-height-loose: 2; /* Project 詳細の概要（10px / 20px 送り） */
 
     /* ---------------------------------------------------------------

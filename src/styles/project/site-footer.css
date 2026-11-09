@@ -113,6 +113,10 @@
     align-items: center;
   }
 
+  .p-site-footer__copyright {
+    font-size: var(--font-size-copyright-sp);
+  }
+
   /* ---------------------------------------------------------------
    * 開閉ボタン（＋ / －）。アイコンは疑似要素の 2 本線で描画する
    * ------------------------------------------------------------- */
@@ -246,6 +250,11 @@
       display: flex;
       align-items: baseline;
       gap: var(--spacing-inline-group);
+    }
+
+    /* PC では言語切り替えと同じサイズで 1 行に並べる */
+    .p-site-footer__copyright {
+      font-size: inherit;
     }
 
     .p-site-footer__toggle {

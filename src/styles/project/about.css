@@ -63,7 +63,7 @@
    * 本文
    * ------------------------------------------------------------- */
   .p-about__name {
-    font-size: var(--font-size-title);
+    font-size: var(--font-size-about-name);
     letter-spacing: var(--letter-spacing-title);
     line-height: var(--line-height-single);
   }
