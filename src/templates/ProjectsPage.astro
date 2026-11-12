@@ -1,17 +1,18 @@
 ---
 import ProjectsView, { type ProjectListItem } from '@/components/ProjectsView.astro'
 import SiteFooter from '@/components/SiteFooter.astro'
-import { PROJECT_THUMBNAIL } from '@/data/media'
+import { PROJECT_THUMBNAIL, SP_MEDIA_QUERY } from '@/data/media'
 import type { Locale } from '@/i18n/config'
 import { useTranslations } from '@/i18n/ui'
 import BaseLayout from '@/layouts/BaseLayout.astro'
 import { getProjects } from '@/lib/microcms'
-import { buildResponsiveImage } from '@/lib/microcms/image'
+import { buildResponsiveImage, getPreferredSource } from '@/lib/microcms/image'
 import { toProjectPath } from '@/lib/project'
 
 /**
  * Projects 一覧ページ（ja / en 共通）。microCMS `projects` を公開日の新しい順に取得してビューへ渡す。
- * サムネイルはホバー時にのみ表示する補助的な要素のため preload しない。
+ * SP では 1 件目のサムネイルがファーストビューの主要な画像（LCP 候補）になるため、SP に限って preload する。
+ * PC ではホバー時にのみ表示する補助的な要素のため preload しない。
  *
  * @prop {Locale} locale - 表示ロケール
  */
@@ -37,13 +38,22 @@ const items: ProjectListItem[] = projects.map((project) => ({
       PROJECT_THUMBNAIL.sizes
     ),
 }))
+const firstThumbnail = items.at(0)?.thumbnail
 ---
 
 <BaseLayout
   locale={locale}
   title={`${t('nav.projects')} | ${t('meta.title')}`}
   description={t('meta.description')}
+  preloadImage={
+    firstThumbnail && {
+      ...getPreferredSource(firstThumbnail),
+      sizes: firstThumbnail.sizes,
+      media: SP_MEDIA_QUERY,
+    }
+  }
 >
   <ProjectsView locale={locale} items={items} />
-  <SiteFooter locale={locale} pathname={Astro.url.pathname} current="projects" />
+  {/* SP では写真の一覧がスクロールするため、Project 詳細と同じく画面下端に固定して写真に重ねる */}
+  <SiteFooter locale={locale} pathname={Astro.url.pathname} current="projects" isOverlay />
 </BaseLayout>

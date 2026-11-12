@@ -22,7 +22,8 @@ export interface ProjectListItem {
  * PC: 左カラムにプロフィール、第 3 カラムに一覧、第 4 カラムにサムネイル（上端を一覧の上端に揃える）。
  *     サムネイルは常時は出さず、項目にホバー（キーボード操作時はフォーカス）したときだけ表示する。
  *     .p-projects__body は一覧の上下に余白を配分して縦位置を決めるための枠。
- * SP: 上部にページヘッダー「Katsuaki Kobayashi - List」、一覧のみ（サムネイルなし）。
+ * SP: 上部にページヘッダー「Katsuaki Kobayashi - List」、各項目の説明の下にサムネイルを常時表示する。
+ *     1 件目のサムネイルはファーストビューに入るため、即時読み込みにする（preload は ProjectsPage.astro）。
  *
  * PC のプロフィールと SP のページヘッダーは別 DOM のため `--pc` / `--sp` の対で命名する。
  *
@@ -50,24 +51,26 @@ const t = useTranslations(locale)
 
   <div class="p-projects__body">
     <ol class="p-projects__list">
-      {items.map((item) => (
+      {items.map((item, i) => (
         <li class="p-projects__item">
           <article class="p-projects__card">
             <a class="p-projects__link" href={item.href}>
               <h2 class="p-projects__title">{item.title}</h2>
               {item.year && <p class="p-projects__year">{item.year}</p>}
               {item.description && <p class="p-projects__description">{item.description}</p>}
+              {item.thumbnail && (
+                // SP では写真もタップで詳細へ移動できるよう、リンク内に置く。
+                // リンク名はタイトルで足りる装飾的なプレビューのため、代替テキストは空にする
+                <ResponsivePicture
+                  class="p-projects__thumbnail"
+                  image={item.thumbnail}
+                  alt=""
+                  loading={i === 0 ? 'eager' : 'lazy'}
+                  fetchpriority={i === 0 ? 'high' : 'auto'}
+                  decoding="async"
+                />
+              )}
             </a>
-            {item.thumbnail && (
-              // タイトルと同じ内容を補う装飾的なプレビューのため、代替テキストは空にする
-              <ResponsivePicture
-                class="p-projects__thumbnail"
-                image={item.thumbnail}
-                alt=""
-                loading="lazy"
-                decoding="async"
-              />
-            )}
           </article>
         </li>
       ))}

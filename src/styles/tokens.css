@@ -72,10 +72,12 @@
     --size-space-20-40: calc(20 * var(--px) + 20 * var(--fluid));
     --size-space-23-30: calc(23 * var(--px) + 7 * var(--fluid));
     --size-space-28-31: calc(28 * var(--px) + 3 * var(--fluid));
+    --size-space-31: calc(31 * var(--px));
     --size-space-32: calc(32 * var(--px));
     --size-space-32-60: calc(32 * var(--px) + 28 * var(--fluid));
     --size-space-44: calc(44 * var(--px));
     --size-space-86-106: calc(86 * var(--px) + 20 * var(--fluid));
+    --size-space-90: calc(90 * var(--px));
     /* SP 専用: viewport-min で 166px になり、画面幅に比例して伸縮する */
     --size-space-166-sp-scale: calc(166 * 100vi / var(--viewport-min));
 
@@ -91,6 +93,8 @@
      * 比率のまま狭めると 393px 未満（iPhone 13 mini 等）でメニューの「About」と「Contact」が詰まる
      */
     --grid-columns-2: minmax(calc(113 * var(--px)), 113fr) minmax(0, 216fr);
+    /* SP の左寄せの写真（270px）の幅がコンテンツ幅（329px）に占める比率 = 270 / 329 */
+    --grid-content-sp-photo: 82.0669%;
     /* About 写真の幅が第 4 カラムに占める比率 = 300 / 451 */
     --grid-column-4-photo: 66.52%;
     /* 第 4 カラム右寄せの写真（300px）の幅が第 3 カラム幅に占める比率 = 300 / 375 */

@@ -27,20 +27,27 @@ export const ABOUT_PHOTO = {
   sizes: columnSizes(300 / 1280),
 } as const
 
-/** Projects 一覧のサムネイル: About の写真と同じ第 4 カラム右寄せ（300 / 1280） */
-export const PROJECT_THUMBNAIL = {
-  displayWidth: 300,
-  sizes: columnSizes(300 / 1280),
-} as const
-
 /**
  * PC レイアウトに切り替わる幅。CSS 側（layout.css ほか）と一致させること。
  * CSS のメディアクエリではカスタムプロパティを使えないため、ここと CSS の 2 箇所で管理する。
  */
 export const PC_MEDIA_QUERY = '(width >= 64rem)'
 
+/** SP レイアウトの幅（PC_MEDIA_QUERY の否定） */
+export const SP_MEDIA_QUERY = '(width < 64rem)'
+
 /** SP の左右余白の合計（32px × 2 = 4rem） */
 const PAGE_INLINE_TOTAL_SP = '4rem'
+
+/**
+ * Projects 一覧のサムネイル。
+ * PC: About の写真と同じ第 4 カラム右寄せ（300 / 1280）
+ * SP: コンテンツ幅の左寄せ（270 / 329。tokens.css の --grid-content-sp-photo と対応）
+ */
+export const PROJECT_THUMBNAIL = {
+  displayWidth: 300,
+  sizes: `${PC_MEDIA_QUERY} ${columnSizes(300 / 1280)}, calc((100vw - ${PAGE_INLINE_TOTAL_SP}) * ${270 / 329})`,
+} as const
 
 /**
  * Project 詳細の写真。

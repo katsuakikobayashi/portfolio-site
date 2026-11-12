@@ -74,12 +74,18 @@
     --spacing-menu-band: var(--size-space-8); /* SP メニューを開いたときの、文字より上の地色の帯 */
     --spacing-media: var(--size-space-16); /* 縦に並ぶ写真の間（Project 詳細） */
     --spacing-title-media: var(--size-space-17); /* タイトルと写真の間（Project 詳細 SP） */
-    --spacing-list-item: var(--size-space-86-106); /* Projects 一覧の項目間 */
+    --spacing-list-item: var(--size-space-86-106); /* Projects 一覧の項目間（PC） */
+    /* Projects 一覧（SP）: ページヘッダーと一覧の間、写真と次の項目の間 */
+    --spacing-projects-item-sp: var(--size-space-90);
+    /* Projects 一覧（SP）: 説明と写真の間 */
+    --spacing-description-media: var(--size-space-31);
     /*
      * Project 詳細（SP）の本文末尾からページ下端まで。写真が画面幅に比例して伸縮するため、
      * 余白も比例させてカンプ（393px 幅で 166px）の比率を保つ
      */
     --spacing-project-end: var(--size-space-166-sp-scale);
+    /* Projects 一覧（SP）の最後の写真からページ下端まで。カンプの値は Project 詳細と同じ */
+    --spacing-projects-end: var(--size-space-166-sp-scale);
     /* 写真に重ねるフッター（Project 詳細）の、文字より上の地色の帯 */
     --spacing-footer-band: var(--size-space-20-40);
 
@@ -114,6 +120,8 @@
     /* Projects 一覧（PC）のサムネイル。一覧（第 3 カラム）を基準に、幅と右端の位置を指定する */
     --projects-thumbnail-inline-size: var(--grid-column-3-photo);
     --projects-thumbnail-inset-inline-end: calc(var(--grid-column-3-to-end) * -1);
+    /* Projects 一覧（SP）のサムネイル。コンテンツ幅に対する比率で、説明文の折り返し幅にも使う */
+    --projects-thumbnail-inline-size-sp: var(--grid-content-sp-photo);
     /* Projects 一覧（PC）: 一覧の上端の位置（画面の高さに対する比率。カンプ: 980px 高で上端 約 318px） */
     --projects-list-start: var(--size-viewport-block-32-4);
     --grid-columns-project-pc: var(--grid-columns-project);

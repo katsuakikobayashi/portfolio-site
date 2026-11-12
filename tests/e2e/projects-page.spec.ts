@@ -90,11 +90,38 @@ test.describe('Projects 一覧', () => {
     await expect(page.locator('.p-projects__thumbnail').first()).toHaveCSS('opacity', '1')
   })
 
-  test('SP: ページヘッダーを表示し、サムネイルは表示しない', async ({ page }) => {
+  test('SP: ページヘッダーを表示し、サムネイルを常時表示する', async ({ page }) => {
     test.skip(isPcViewport(page), 'SP のみの仕様')
     await page.goto('/projects/')
     await expect(page.locator('.p-projects__identity--sp')).toContainText('List')
-    await expect(page.locator('.p-projects__thumbnail').first()).toBeHidden()
+    const thumbnail = page.locator('.p-projects__thumbnail').first()
+    await expect(thumbnail).toBeVisible()
+    await expect(thumbnail).toHaveCSS('opacity', '1')
+    // 1 件目はファーストビューに入るため即時読み込みし、SP 向けに先読みする
+    await expect(thumbnail).toHaveAttribute('loading', 'eager')
+    await expect(page.locator('link[rel="preload"][as="image"]')).toHaveAttribute(
+      'media',
+      '(width < 64rem)'
+    )
+  })
+
+  test('SP: 説明文は写真の幅で折り返す', async ({ page }) => {
+    test.skip(isPcViewport(page), 'SP のみの仕様')
+    await page.goto('/projects/')
+    const card = page
+      .locator('.p-projects__card')
+      .filter({ has: page.locator('.p-projects__description') })
+      .first()
+    const descriptionBox = await card.locator('.p-projects__description').boundingBox()
+    const thumbnailBox = await card.locator('.p-projects__thumbnail').boundingBox()
+    expect(descriptionBox?.width ?? Infinity).toBeLessThanOrEqual((thumbnailBox?.width ?? 0) + 1)
+  })
+
+  test('SP: 写真をタップすると詳細ページへ移動する', async ({ page }) => {
+    test.skip(isPcViewport(page), 'SP のみの仕様')
+    await page.goto('/projects/')
+    await page.locator('.p-projects__thumbnail').first().click()
+    await page.waitForURL(/\/projects\/[\w-]+\/$/)
   })
 })
 
