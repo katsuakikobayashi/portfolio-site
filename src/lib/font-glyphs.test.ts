@@ -50,7 +50,7 @@ describe('getStaticTexts', () => {
 describe('fetchSiteGlyphs', () => {
   it('UI 文言と microCMS の全エンドポイントの文字をまとめて返す', async () => {
     const responses: Record<string, unknown> = {
-      top: { sliderImages: [] },
+      top: { slider: [] },
       about: { name: '小林', text: '設計' },
       projects: { contents: [{ title: '砧の家', body: '<p>庭</p>' }], totalCount: 1 },
     }

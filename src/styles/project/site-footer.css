@@ -263,6 +263,16 @@
       grid-column: 1 / -1;
     }
 
+    /*
+     * 全幅の Contact とページリンク群（第 1〜2 カラム）は列が重なるため、行を明示しないと
+     * 自動配置でどちらかが 2 行目に送られる（片方だけ明示しても、もう片方が押し出される）。
+     * 両方を 1 行目に固定して同じ行に重ねる
+     */
+    .p-site-footer--contact-content-center .p-site-footer__pages,
+    .p-site-footer--contact-content-center .p-site-footer__contact {
+      grid-row: 1;
+    }
+
     .p-site-footer--contact-content-center .p-site-footer__contact {
       grid-column: 1 / -1;
       justify-self: center;

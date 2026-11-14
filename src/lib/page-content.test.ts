@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { ABOUT_PHOTO, PROJECT_IMAGE, TOP_SLIDE } from '@/data/media'
-import type { AboutContent, ProjectContent } from '@/lib/microcms/types'
+import type { AboutContent, ProjectContent, TopSlideItem } from '@/lib/microcms/types'
 import type { Project } from '@/lib/project'
 import {
   toAboutView,
@@ -33,7 +33,7 @@ const project: Project = {
   body: { ja: '<p>日本語</p>', en: '<p>English</p>' },
 }
 
-/** `top.sliderImages` が参照する projects の 1 件 */
+/** `top.slider[].content` が参照する projects の 1 件 */
 const referencedProject: ProjectContent = {
   id: 'abc',
   createdAt: '',
@@ -44,22 +44,42 @@ const referencedProject: ProjectContent = {
   images: [image],
 }
 
+/** スライド専用の写真 */
+const slideImage = { ...image, url: 'https://images.microcms-assets.io/slide.jpg' }
+
+/**
+ * @function toSlideItem
+ * @description `top.slider` の 1 件を組み立てる（テスト用）
+ * @param {Omit<TopSlideItem, 'fieldId'>} fields - image / content
+ * @returns {TopSlideItem} 繰り返しフィールドの 1 件
+ */
+const toSlideItem = (fields: Omit<TopSlideItem, 'fieldId'>): TopSlideItem => ({
+  fieldId: 'slideItem',
+  ...fields,
+})
+
 describe('toTopSlides', () => {
-  it('参照先のサムネイルを TOP の表示サイズで変換し、詳細ページへのリンクを付ける', () => {
-    const [slide] = toTopSlides({ sliderImages: [referencedProject] }, 'ja')
+  it('スライドの写真を TOP の表示サイズで変換し、参照先の詳細ページへのリンクを付ける', () => {
+    const [slide] = toTopSlides(
+      { slider: [toSlideItem({ image: slideImage, content: referencedProject })] },
+      'ja'
+    )
     expect(slide?.title).toBe('House in Kinuta')
     expect(slide?.href).toBe('/projects/project_1/')
-    expect(slide?.image.src).toContain('thumbnail.jpg')
+    expect(slide?.image.src).toContain('slide.jpg')
     expect(slide?.image.width).toBe(TOP_SLIDE.displayWidth)
     expect(slide?.image.sizes).toBe(TOP_SLIDE.sizes)
   })
 
   it('リンク先はロケールに合わせる', () => {
-    const [slide] = toTopSlides({ sliderImages: [referencedProject] }, 'en')
+    const [slide] = toTopSlides(
+      { slider: [toSlideItem({ image: slideImage, content: referencedProject })] },
+      'en'
+    )
     expect(slide?.href).toBe('/en/projects/project_1/')
   })
 
-  it('サムネイルが未入力なら詳細ページの 1 枚目を使い、写真が無ければ除外する', () => {
+  it('写真が未入力なら参照先のサムネイル → 詳細ページの 1 枚目で代替し、どれも無ければ除外する', () => {
     const withoutImages: ProjectContent = {
       id: 'def',
       createdAt: '',
@@ -67,15 +87,32 @@ describe('toTopSlides', () => {
       title: 'No Image',
       url: 'project_2',
     }
-    const withoutThumbnail: ProjectContent = { ...withoutImages, images: [image] }
-    const slides = toTopSlides({ sliderImages: [withoutThumbnail, withoutImages] }, 'ja')
-    expect(slides).toHaveLength(1)
-    expect(slides[0]?.image.src).toContain('a.jpg')
+    const slides = toTopSlides(
+      {
+        slider: [
+          toSlideItem({ content: referencedProject }),
+          toSlideItem({ content: { ...withoutImages, images: [image] } }),
+          toSlideItem({ content: withoutImages }),
+        ],
+      },
+      'ja'
+    )
+    expect(slides.map((slide) => slide.image.src)).toEqual([
+      expect.stringContaining('thumbnail.jpg'),
+      expect.stringContaining('a.jpg'),
+    ])
+  })
+
+  it('参照先が未選択のスライドは除外する', () => {
+    expect(toTopSlides({ slider: [toSlideItem({ image: slideImage })] }, 'ja')).toEqual([])
   })
 
   it('参照先の url が不正ならエラーにする', () => {
     expect(() =>
-      toTopSlides({ sliderImages: [{ ...referencedProject, url: '../about' }] }, 'ja')
+      toTopSlides(
+        { slider: [toSlideItem({ content: { ...referencedProject, url: '../about' } })] },
+        'ja'
+      )
     ).toThrow()
   })
 })

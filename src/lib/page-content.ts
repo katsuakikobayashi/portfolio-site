@@ -54,18 +54,21 @@ export const EMPTY_PROJECT_VIEW: ProjectView = {
 
 /**
  * @function toTopSlides
- * @description TOP のスライドを、参照先プロジェクトの写真と詳細ページへのリンクに変換する。
- *              写真は一覧と同じサムネイルを優先し、未入力なら詳細ページの 1 枚目で代替する。
- *              どちらも無いプロジェクトは表示できないため除外する。
- * @param {Pick<TopContent, 'sliderImages'>} top - microCMS `top`
+ * @description TOP のスライド（`top.slider`）を、写真と参照先プロジェクトの詳細ページへのリンクに変換する。
+ *              写真はスライド専用の image を優先し、未入力なら参照先の一覧サムネイル → 詳細ページの 1 枚目で代替する。
+ *              参照先が未選択（リンク先・代替テキストが決まらない）、または写真が 1 枚も無いスライドは除外する。
+ * @param {Pick<TopContent, 'slider'>} top - microCMS `top`
  * @param {Locale} locale - リンク先のロケール
  * @returns {TopSlide[]} スライド
  * @throws {Error} 参照先の url が不正な場合（lib/project.ts の toProjectSlug）
  */
-export const toTopSlides = (top: Pick<TopContent, 'sliderImages'>, locale: Locale): TopSlide[] =>
-  top.sliderImages.flatMap((project) => {
+export const toTopSlides = (top: Pick<TopContent, 'slider'>, locale: Locale): TopSlide[] =>
+  top.slider.flatMap(({ image: slideImage, content: project }) => {
+    if (project === undefined) {
+      return []
+    }
     const [firstImage] = project.images ?? []
-    const image = project.thumbnail ?? firstImage
+    const image = slideImage ?? project.thumbnail ?? firstImage
     if (image === undefined) {
       return []
     }

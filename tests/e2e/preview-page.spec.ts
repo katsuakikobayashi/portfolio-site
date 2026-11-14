@@ -19,22 +19,28 @@ const DRAFTS: Readonly<Record<string, unknown>> = {
   top: {
     createdAt: '',
     updatedAt: '',
-    sliderImages: [
+    slider: [
       {
-        id: 'p1',
-        createdAt: '',
-        updatedAt: '',
-        title: 'Draft Slide 1',
-        url: 'slide_1',
-        thumbnail: image,
+        fieldId: 'slideItem',
+        image,
+        content: {
+          id: 'p1',
+          createdAt: '',
+          updatedAt: '',
+          title: 'Draft Slide 1',
+          url: 'slide_1',
+        },
       },
       {
-        id: 'p2',
-        createdAt: '',
-        updatedAt: '',
-        title: 'Draft Slide 2',
-        url: 'slide_2',
-        images: [image],
+        fieldId: 'slideItem',
+        content: {
+          id: 'p2',
+          createdAt: '',
+          updatedAt: '',
+          title: 'Draft Slide 2',
+          url: 'slide_2',
+          images: [image],
+        },
       },
     ],
   },

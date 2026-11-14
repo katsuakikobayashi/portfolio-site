@@ -19,11 +19,20 @@ export interface MicrocmsObjectMeta {
 }
 
 /**
- * エンドポイント `top`（オブジェクト形式）。
- * sliderImages は `projects` を参照する複数コンテンツ参照フィールドで、参照先の 1 件がそのまま入る。
+ * `top.slider` の繰り返しフィールドの 1 件（カスタムフィールド ID: `slideItem`）。
+ * 画像・参照先とも管理画面で未入力のまま保存できるため任意にしている。
  */
+export interface TopSlideItem {
+  fieldId: 'slideItem'
+  /** スライドに表示する写真 */
+  image?: MicrocmsImage
+  /** リンク先のプロジェクト（`projects` のコンテンツ参照。参照先の 1 件がそのまま入る） */
+  content?: ProjectContent
+}
+
+/** エンドポイント `top`（オブジェクト形式） */
 export interface TopContent extends MicrocmsObjectMeta {
-  sliderImages: ProjectContent[]
+  slider: TopSlideItem[]
 }
 
 /** エンドポイント `about`（オブジェクト形式） */

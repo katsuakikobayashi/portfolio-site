@@ -113,11 +113,12 @@ cp .env.example .env
 
 | エンドポイント | 形式         | フィールド                                                                     | 使用箇所                      |
 | -------------- | ------------ | ------------------------------------------------------------------------------ | ----------------------------- |
-| `top`          | オブジェクト | `slideImages`（画像・複数）                                                    | TOPのスライドショー（PCのみ） |
+| `top`          | オブジェクト | `slider`（繰り返し `slideItem`：`image`、`content`（`projects`を参照））       | TOPのスライドショー（PCのみ） |
 | `about`        | オブジェクト | `image`、`imageCaption`、`name`、`nameEn`、`text`、`textEn`                    | About                         |
 | `projects`     | リスト       | `title`、`url`、`year`、`description`、`thumbnail`、`images`、`body`、`bodyEn` | Projects一覧・詳細            |
 
 - 型定義は[src/lib/microcms/types.ts](./src/lib/microcms/types.ts)です。管理画面でフィールドを変更した場合はここも更新してください。
+- TOPのスライドは`slider`の並び順で表示し、写真をクリックすると`content`で選んだProjectの詳細ページへ移動します。写真は`image`を使い、未入力なら参照先の`thumbnail`、それも無ければ`images`の1枚目を使います。`content`が未選択のスライドと、写真が1枚も無いスライドは表示しません。
 - 本文（`text` / `textEn`）は空行で段落、改行で行を分けます。HTMLとしては解釈しません。
 - Projectsの`url`は詳細ページのURLになります。使える文字は英数字・`-`・`_`のみです。不正な文字や重複があるとビルドを止めます。
 - Projectsの本文（`body` / `bodyEn`）はリッチテキストです。段落・改行と、カスタムクラス付きの範囲（黒100%で表示）だけを解釈し、それ以外の装飾（リンク・太字など）は文字だけを表示します（[src/lib/rich-text.ts](./src/lib/rich-text.ts)）。HTMLをそのまま埋め込まないため、サニタイズライブラリは使っていません。`bodyEn`が空の場合は`body`を表示します。
