@@ -105,7 +105,7 @@
    * 本文（CMS リッチテキスト）
    * ------------------------------------------------------------- */
   .p-project__text {
-    font-size: var(--font-size-fine);
+    font-size: var(--font-size-project-text);
     letter-spacing: var(--letter-spacing-caption);
     line-height: var(--line-height-loose);
     color: var(--color-text-subtle);

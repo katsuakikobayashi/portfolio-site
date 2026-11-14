@@ -127,7 +127,7 @@ test.describe('SP タップ領域', () => {
    */
   const OUTSIDE_TEXT_OFFSET = 10
   /*
-   * メールと instagram の間隔（9px）の半分より内側の距離（px）。
+   * メールと instagram の間隔（--spacing-list: 12px）の半分より内側の距離（px）。
    * 間隔の中央が両リンクの境目になるため、それぞれの側に収まる位置を指す
    */
   const CONTACT_GAP_OFFSET = 3

@@ -22,7 +22,7 @@ const { locale, label, class: className } = Astro.props
 
 <header class:list={['l-page__header', 'p-page-header', className]}>
   <p class="p-page-header__title">
-    <a class="p-page-header__home" href={localizePath(ROUTES.top, locale)}>
+    <a class="p-page-header__home c-touch-target" href={localizePath(ROUTES.top, locale)}>
       {SITE.name}
     </a>
     <span class="p-page-header__sep" aria-hidden="true">

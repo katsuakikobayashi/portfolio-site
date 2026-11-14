@@ -31,22 +31,32 @@
      * 文字サイズ（役割ベース）
      * ------------------------------------------------------------- */
     --font-size-title: var(--size-text-15-17); /* 氏名 */
-    /* About の氏名。デザイン指定により、他ページの氏名（15px〜）より小さい 12px から可変する */
-    --font-size-about-name: var(--size-text-12-17);
-    /* About の和文の氏名。全角は字面が大きく見えるため、欧文より小さい 11.5px 固定にする（デザイン指定） */
-    --font-size-about-name-ja: var(--size-text-11-5);
+    /*
+     * About の氏名・本文（デザイン指定）。SP は日英共通で氏名 12px・本文 10.5px。
+     * PC は欧文の氏名を 12px〜17px で可変、和文の氏名を 11.5px（全角は字面が大きく見えるため欧文より小さく）、
+     * 本文を --font-size-body にする（このファイル末尾のメディアクエリ）
+     */
+    --font-size-about-name: var(--size-text-12);
+    --font-size-about-name-ja: var(--size-text-12);
+    --font-size-about-text: var(--size-text-10-5);
     --font-size-label: var(--size-text-12-13); /* 肩書き・フッターナビ（PC） */
     /*
-     * SP の肩書き（Designer）とフッター（Projects / About / Contact・jp / en）は 11px（デザイン指定）。
+     * SP の肩書き（Designer）は 11.5px、フッター（Projects / About / Contact・©年）は 11px（デザイン指定）。
      * PC では --font-size-label に切り替える（このファイル末尾のメディアクエリ）
      */
-    --font-size-role: var(--size-text-11);
+    --font-size-role: var(--size-text-11-5);
     --font-size-footer: var(--size-text-11);
+    /* SP の分野（Product / Select / …）は 10.5px（デザイン指定）。PC は本文と同じ */
+    --font-size-disciplines: var(--size-text-10-5);
+    /* SP の言語切り替え（jp / en）は 11.5px（デザイン指定）。PC はフッターの他の文字と同じ */
+    --font-size-lang: var(--size-text-11-5);
     --font-size-body: var(--size-text-10-12); /* 本文・リンク */
     --font-size-header: var(--size-text-13); /* SP ページヘッダー */
-    --font-size-fine: var(--size-text-10); /* 写真クレジット・Project 詳細の概要 */
-    /* Projects 一覧の斜体（年・説明）。PC / SP 共通で 10px 固定（デザイン指定） */
-    --font-size-note: var(--size-text-10);
+    --font-size-fine: var(--size-text-10); /* 写真クレジット・下書きプレビューの状態表示 */
+    /* Projects 一覧の斜体（年・説明）。PC / SP 共通で 10.5px 固定（デザイン指定） */
+    --font-size-note: var(--size-text-10-5);
+    /* Project 詳細の概要の本文。PC / SP 共通で 10.5px 固定（デザイン指定） */
+    --font-size-project-text: var(--size-text-10-5);
 
     /* ---------------------------------------------------------------
      * 字間（カンプの文字列幅の実測から逆算）
@@ -73,6 +83,9 @@
      * ------------------------------------------------------------- */
     --spacing-caption: var(--size-space-8); /* 写真とクレジットの間 */
     --spacing-list: var(--size-space-12); /* 縦に並ぶリンク間（SP フッターのメールと instagram） */
+    --spacing-menu-item: var(
+      --size-space-16
+    ); /* SP フッターメニューの Projects / About / Contact の間 */
     --spacing-xs: var(--size-space-12-14); /* 肩書きと分野の間 */
     --spacing-sm: var(--size-space-19); /* 見出しとリンク群の間（SP メニュー） */
     --spacing-md: var(--size-space-23-30); /* 氏名と本文の間（About） */
@@ -114,7 +127,8 @@
     --page-block-end: var(--size-space-17-36);
     /* 写真に重ねるフッター全体の高さ（帯 + 1 行 + 下余白）。site-footer.css の構成と一致させること */
     --footer-overlay-block-size: calc(
-      var(--spacing-footer-band) + var(--font-size-footer) + var(--page-block-end)
+      var(--spacing-footer-band) + max(var(--font-size-footer), var(--font-size-lang)) +
+        var(--page-block-end)
     );
 
     /* ---------------------------------------------------------------
@@ -137,8 +151,10 @@
       (100% - var(--page-inline) * 2) * var(--grid-content-photo-ratio)
     );
     --projects-thumbnail-inset-inline-end: var(--page-inline);
-    /* Projects 一覧（SP）のサムネイル。コンテンツ幅に対する比率で、説明文の折り返し幅にも使う */
+    /* Projects 一覧（SP）のサムネイル。コンテンツ幅に対する比率 */
     --projects-thumbnail-inline-size-sp: var(--grid-content-sp-photo);
+    /* Projects 一覧（PC / SP）の説明文（斜体）の折り返し幅。項目全体の幅の 3 分の 2（デザイン指定） */
+    --projects-description-inline-size: var(--grid-fraction-2-3);
     /* Projects 一覧（PC）: 一覧の上端の位置（画面の高さに対する比率。カンプ: 980px 高で上端 約 318px） */
     --projects-list-start: var(--size-viewport-block-32-4);
     /*
@@ -156,7 +172,7 @@
      */
     --profile-block-size: calc(
       var(--font-size-title) + var(--spacing-lg) + var(--font-size-role) + var(--spacing-xs) +
-        var(--font-size-body)
+        var(--font-size-disciplines)
     );
     /*
      * プロフィールを画面の縦中央に sticky 固定するときの上端（Project 詳細・Projects 一覧の PC）。
@@ -198,6 +214,11 @@
     :root {
       --font-size-role: var(--font-size-label);
       --font-size-footer: var(--font-size-label);
+      --font-size-lang: var(--font-size-label);
+      --font-size-disciplines: var(--font-size-body);
+      --font-size-about-name: var(--size-text-12-17);
+      --font-size-about-name-ja: var(--size-text-11-5);
+      --font-size-about-text: var(--font-size-body);
     }
   }
 }

@@ -83,10 +83,10 @@
     line-height: var(--line-height-single);
   }
 
-  /* SP では説明文を写真の幅で折り返す（% の基準はどちらもリンクの幅） */
+  /* 説明文は PC / SP とも項目全体（リンク）の幅の 3 分の 2 で折り返す（% の基準はリンクの幅） */
   .p-projects__description {
     grid-column: 1 / -1;
-    max-inline-size: var(--projects-thumbnail-inline-size-sp);
+    max-inline-size: var(--projects-description-inline-size);
     margin-block-start: var(--spacing-xs);
     font-size: var(--font-size-note);
     font-style: italic;
@@ -142,11 +142,6 @@
 
     .p-projects__item + .p-projects__item {
       margin-block-start: var(--spacing-list-item);
-    }
-
-    /* PC の説明文はカンプどおり第 3 カラム幅で折り返す（サムネイルは別カラムに出るため） */
-    .p-projects__description {
-      max-inline-size: none;
     }
 
     /*

@@ -71,7 +71,7 @@
   }
 
   .p-about__paragraph {
-    font-size: var(--font-size-body);
+    font-size: var(--font-size-about-text);
     letter-spacing: var(--letter-spacing-body);
     line-height: var(--line-height-prose);
   }

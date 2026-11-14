@@ -35,7 +35,7 @@
 
   .p-profile__disciplines {
     margin-block-start: var(--spacing-xs);
-    font-size: var(--font-size-body);
+    font-size: var(--font-size-disciplines);
     letter-spacing: var(--letter-spacing-body);
     line-height: var(--line-height-single);
   }

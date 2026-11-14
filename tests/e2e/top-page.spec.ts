@@ -48,15 +48,36 @@ test.describe('TOP ページ', () => {
     expect(Math.abs(centerX(contactBox) - centerX(slideshowBox))).toBeLessThanOrEqual(1)
   })
 
-  test('SP: 肩書き・フッターのナビ・言語切り替え・コピーライトは 11px で表示する', async ({
-    page,
-  }) => {
+  test('SP: 言語切り替えは 11.5px で表示する', async ({ page }) => {
     test.skip(isPcViewport(page), 'SP のみの仕様')
-    await expect(page.locator('.p-profile__role')).toHaveCSS('font-size', '11px')
+    await expect(page.locator('.p-site-footer__lang')).toHaveCSS('font-size', '11.5px')
+  })
+
+  test('SP: メニューの Projects・About・Contact は 16px の間隔で並ぶ', async ({ page }) => {
+    test.skip(isPcViewport(page), 'SP のみの仕様')
+    await openMenuIfCollapsed(page)
+    const labels = page.locator('.p-site-footer__label')
+    const projectsBox = await labels.nth(0).boundingBox()
+    const aboutBox = await labels.nth(1).boundingBox()
+    const contactBox = await page.locator('.p-site-footer__contact-heading').boundingBox()
+    const rightOf = (box: typeof projectsBox): number => (box?.x ?? 0) + (box?.width ?? 0)
+    const projectsToAbout = (aboutBox?.x ?? 0) - rightOf(projectsBox)
+    const aboutToContact = (contactBox?.x ?? 0) - rightOf(aboutBox)
+    expect(projectsToAbout).toBeCloseTo(16, 0)
+    expect(aboutToContact).toBeCloseTo(16, 0)
+  })
+
+  test('SP: 肩書きは 11.5px、分野は 10.5px で表示する', async ({ page }) => {
+    test.skip(isPcViewport(page), 'SP のみの仕様')
+    await expect(page.locator('.p-profile__role')).toHaveCSS('font-size', '11.5px')
+    await expect(page.locator('.p-profile__disciplines')).toHaveCSS('font-size', '10.5px')
+  })
+
+  test('SP: フッターのナビ・コピーライトは 11px で表示する', async ({ page }) => {
+    test.skip(isPcViewport(page), 'SP のみの仕様')
     await openMenuIfCollapsed(page)
     await expect(page.locator('.p-site-footer__page').first()).toHaveCSS('font-size', '11px')
     await expect(page.locator('.p-site-footer__contact-heading')).toHaveCSS('font-size', '11px')
-    await expect(page.locator('.p-site-footer__lang')).toHaveCSS('font-size', '11px')
     await expect(page.locator('.p-site-footer__copyright')).toHaveCSS('font-size', '11px')
   })
 

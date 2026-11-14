@@ -25,6 +25,12 @@
     grid-area: 1 / 1;
     align-self: start;
     padding-block-start: var(--page-block-start);
+    /*
+     * 上詰めで配置するページ（SP の Projects 一覧・詳細）では、main が同じセルの上端から始まり
+     * ヘッダーに重なる。後に置かれた main が手前に描画されてヘッダーのリンクを覆うため、
+     * positioned にしてヘッダーを手前に出す
+     */
+    position: relative;
   }
 
   .l-page__main {

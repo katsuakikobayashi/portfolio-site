@@ -12,13 +12,23 @@ test.describe('About ページ', () => {
     expect(await page.locator('.p-about__paragraph').count()).toBeGreaterThan(0)
   })
 
-  test('和文の氏名は 11.5px・字間 0.56em で表示する', async ({ page }) => {
+  test('PC: 和文の氏名は 11.5px・字間 0.56em で表示する', async ({ page }) => {
+    test.skip(!isPcViewport(page), 'PC のみの仕様')
     await page.goto('/about/')
     const name = page.locator('.p-about__name')
     await expect(name).toHaveCSS('font-size', '11.5px')
     // 0.56em × 11.5px = 6.44px
     await expect(name).toHaveCSS('letter-spacing', '6.44px')
   })
+
+  for (const path of ['/about/', '/en/about/']) {
+    test(`SP: 氏名は 12px、本文は 10.5px で表示する（${path}）`, async ({ page }) => {
+      test.skip(isPcViewport(page), 'SP のみの仕様')
+      await page.goto(path)
+      await expect(page.locator('.p-about__name')).toHaveCSS('font-size', '12px')
+      await expect(page.locator('.p-about__paragraph').first()).toHaveCSS('font-size', '10.5px')
+    })
+  }
 
   test('本文の改行は <br> で表現され、HTML としては解釈されない', async ({ page }) => {
     await page.goto('/about/')

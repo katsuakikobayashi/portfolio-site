@@ -1,5 +1,10 @@
 import { expect, test, type Page } from '@playwright/test'
-import { getContactLineEdges, isPcViewport, openMenuIfCollapsed } from './helpers'
+import {
+  getContactLineEdges,
+  getLinkHrefAtPoint,
+  isPcViewport,
+  openMenuIfCollapsed,
+} from './helpers'
 
 /**
  * Projects の内容は microCMS（`projects`）に依存するため、
@@ -13,6 +18,24 @@ import { getContactLineEdges, isPcViewport, openMenuIfCollapsed } from './helper
  * @param {string} listPath - 一覧ページのパス
  * @returns {Promise<string>} 開いたプロジェクトのタイトル
  */
+/**
+ * @function expectHeaderLinksToTop
+ * @description SP のページヘッダーの氏名をタップした位置で、TOP へのリンクが反応することを検証する
+ *              （要素が手前の別要素に覆われていないかを、座標の最前面の要素で確かめる）
+ * @param {Page} page - 対象ページ
+ * @param {string} topPath - 期待する TOP のパス
+ * @returns {Promise<void>}
+ */
+const expectHeaderLinksToTop = async (page: Page, topPath = '/'): Promise<void> => {
+  const box = await page.locator('.p-page-header__home').boundingBox()
+  const href = await getLinkHrefAtPoint(
+    page,
+    (box?.x ?? 0) + (box?.width ?? 0) / 2,
+    (box?.y ?? 0) + (box?.height ?? 0) / 2
+  )
+  expect(href).toBe(topPath)
+}
+
 const openFirstProject = async (page: Page, listPath = '/projects/'): Promise<string> => {
   await page.goto(listPath)
   const title = (await page.locator('.p-projects__title').first().innerText()).trim()
@@ -48,10 +71,10 @@ test.describe('Projects 一覧', () => {
     await expect(nav.locator('[aria-current="page"]')).toContainText('Projects')
   })
 
-  test('斜体の年・説明は 10px で表示する', async ({ page }) => {
+  test('斜体の年・説明は 10.5px で表示する', async ({ page }) => {
     await page.goto('/projects/')
-    await expect(page.locator('.p-projects__year').first()).toHaveCSS('font-size', '10px')
-    await expect(page.locator('.p-projects__description').first()).toHaveCSS('font-size', '10px')
+    await expect(page.locator('.p-projects__year').first()).toHaveCSS('font-size', '10.5px')
+    await expect(page.locator('.p-projects__description').first()).toHaveCSS('font-size', '10.5px')
   })
 
   test('サムネイルは WebP の srcset と寸法を持つ', async ({ page }) => {
@@ -155,16 +178,21 @@ test.describe('Projects 一覧', () => {
     )
   })
 
-  test('SP: 説明文は写真の幅で折り返す', async ({ page }) => {
+  test('SP: ページヘッダーの氏名は TOP へのリンクとして押せる', async ({ page }) => {
     test.skip(isPcViewport(page), 'SP のみの仕様')
+    await page.goto('/projects/')
+    await expectHeaderLinksToTop(page)
+  })
+
+  test('説明文は項目全体の幅の 3 分の 2 で折り返す', async ({ page }) => {
     await page.goto('/projects/')
     const card = page
       .locator('.p-projects__card')
       .filter({ has: page.locator('.p-projects__description') })
       .first()
     const descriptionBox = await card.locator('.p-projects__description').boundingBox()
-    const thumbnailBox = await card.locator('.p-projects__thumbnail').boundingBox()
-    expect(descriptionBox?.width ?? Infinity).toBeLessThanOrEqual((thumbnailBox?.width ?? 0) + 1)
+    const linkBox = await card.locator('.p-projects__link').boundingBox()
+    expect(descriptionBox?.width ?? Infinity).toBeLessThanOrEqual((linkBox?.width ?? 0) * 0.75 + 1)
   })
 
   test('SP: 写真をタップすると詳細ページへ移動する', async ({ page }) => {
@@ -244,6 +272,11 @@ test.describe('Project 詳細', () => {
     const black = /^(rgb\(0, 0, 0\)|oklch\(0 0 0\))$/
     await expect(page.locator('.p-project__emphasis').first()).toHaveCSS('color', black)
     await expect(page.locator('.p-project__text')).not.toHaveCSS('color', black)
+  })
+
+  test('概要の本文は 10.5px で表示する', async ({ page }) => {
+    await openFirstProject(page)
+    await expect(page.locator('.p-project__text')).toHaveCSS('font-size', '10.5px')
   })
 
   test('フッターの Projects は一覧へ戻るリンクになっている', async ({ page }) => {
@@ -360,6 +393,12 @@ test.describe('Project 詳細', () => {
     const textBox = await text.boundingBox()
     const footerBox = await page.locator('.js-site-footer').boundingBox()
     expect((textBox?.y ?? 0) + (textBox?.height ?? 0)).toBeLessThanOrEqual(footerBox?.y ?? 0)
+  })
+
+  test('SP: ページヘッダーの氏名は TOP へのリンクとして押せる', async ({ page }) => {
+    test.skip(isPcViewport(page), 'SP のみの仕様')
+    await openFirstProject(page)
+    await expectHeaderLinksToTop(page)
   })
 
   test('SP: ページヘッダー「Katsuaki Kobayashi - Project」を表示する', async ({ page }) => {

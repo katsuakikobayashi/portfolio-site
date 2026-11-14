@@ -22,11 +22,16 @@
   /* ---------------------------------------------------------------
    * ナビゲーション（SP では開閉メニュー）
    * ------------------------------------------------------------- */
+  /*
+   * SP: Projects・About・Contact を画面幅に関わらず同じ間隔（--spacing-menu-item）で並べる（デザイン指定）。
+   * フッターのカラムには揃えず、ページリンク群の幅 + 間隔の位置に Contact を置く
+   */
   .p-site-footer__nav {
     display: none;
     grid-column: 1 / -1;
     grid-row: 1;
-    grid-template-columns: subgrid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    column-gap: var(--spacing-menu-item);
     align-items: start;
     margin-block-end: var(--spacing-xl);
   }
@@ -48,7 +53,7 @@
     grid-column: 1;
     display: flex;
     flex-wrap: wrap;
-    gap: var(--spacing-inline-item);
+    gap: var(--spacing-menu-item);
   }
 
   .p-site-footer__link {
@@ -115,6 +120,10 @@
     display: grid;
     grid-template-columns: subgrid;
     align-items: center;
+  }
+
+  .p-site-footer__lang {
+    font-size: var(--font-size-lang);
   }
 
   /* ---------------------------------------------------------------
@@ -193,6 +202,9 @@
     .p-site-footer.is-menu-open .p-site-footer__nav {
       display: grid;
       grid-column: 1 / 4;
+      /* PC はフッターの 4 カラムグリッドを継承し、カンプのカラム位置に揃える */
+      grid-template-columns: subgrid;
+      column-gap: normal;
       align-items: baseline;
       margin-block-end: 0;
       animation: none;

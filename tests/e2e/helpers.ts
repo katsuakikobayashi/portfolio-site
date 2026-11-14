@@ -61,3 +61,24 @@ export const getContactLineEdges = (page: Page): Promise<InlineEdges> =>
     const { left, right } = range.getBoundingClientRect()
     return { left, right }
   })
+
+/**
+ * @function getFooterNavGaps
+ * @description フッターナビの「Projects ↔ About」「About ↔ Contact」の間隔（文字の範囲どうしの距離）を返す
+ * @param {Page} page - 対象ページ
+ * @returns {Promise<number[]>} 左から順の間隔（px）
+ */
+export const getFooterNavGaps = (page: Page): Promise<number[]> =>
+  page.evaluate(() => {
+    const inkEdges = (element: Element): { left: number; right: number } => {
+      const range = document.createRange()
+      range.selectNodeContents(element)
+      const { left, right } = range.getBoundingClientRect()
+      return { left, right }
+    }
+    const items = [
+      ...document.querySelectorAll('.p-site-footer__page > *'),
+      ...document.querySelectorAll('.p-site-footer__contact-heading'),
+    ].map(inkEdges)
+    return items.slice(1).map((item, i) => item.left - (items[i]?.right ?? 0))
+  })
