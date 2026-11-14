@@ -145,7 +145,7 @@
       margin-block-start: var(--spacing-list-item);
     }
 
-    /* PC の説明文は項目全体の幅の 5 分の 4 で折り返す（サムネイルは別の位置に出るため写真の幅に合わせない） */
+    /* PC の説明文は項目全体の幅の 6 分の 5 で折り返す（サムネイルは別の位置に出るため写真の幅に合わせない） */
     .p-projects__description {
       max-inline-size: var(--projects-description-inline-size);
     }

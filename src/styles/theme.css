@@ -151,8 +151,11 @@
     --projects-thumbnail-inset-inline-end: var(--page-inline);
     /* Projects 一覧（SP）のサムネイル。コンテンツ幅に対する比率で、説明文の折り返し幅にも使う */
     --projects-thumbnail-inline-size-sp: var(--grid-content-sp-photo);
-    /* Projects 一覧（PC）の説明文（斜体）の折り返し幅。項目全体の幅の 5 分の 4（デザイン指定） */
-    --projects-description-inline-size: var(--grid-fraction-4-5);
+    /*
+     * Projects 一覧（PC）の説明文（斜体）の折り返し幅。項目全体の幅の 6 分の 5（デザイン指定）。
+     * 1 行目右端の年（例: 2026）の左端より手前で折り返す
+     */
+    --projects-description-inline-size: var(--grid-fraction-5-6);
     /* Projects 一覧（PC）: 一覧の上端の位置（画面の高さに対する比率。カンプ: 980px 高で上端 約 318px） */
     --projects-list-start: var(--size-viewport-block-32-4);
     /*

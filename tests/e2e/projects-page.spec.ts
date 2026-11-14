@@ -194,18 +194,21 @@ test.describe('Projects 一覧', () => {
     await expectHeaderLinksToTop(page)
   })
 
-  test('PC: 説明文は項目全体の幅の 5 分の 4 で折り返す', async ({ page }) => {
+  test('PC: 説明文は項目全体の幅の 6 分の 5 で折り返し、年に重ならない', async ({ page }) => {
     test.skip(!isPcViewport(page), 'PC のみの仕様')
     await page.goto('/projects/')
     const card = page
       .locator('.p-projects__card')
       .filter({ has: page.locator('.p-projects__description') })
+      .filter({ has: page.locator('.p-projects__year') })
       .first()
     const descriptionBox = await card.locator('.p-projects__description').boundingBox()
     const linkBox = await card.locator('.p-projects__link').boundingBox()
+    const yearBox = await card.locator('.p-projects__year').boundingBox()
     expect(
-      Math.abs((descriptionBox?.width ?? 0) - (linkBox?.width ?? 0) * 0.8)
+      Math.abs((descriptionBox?.width ?? 0) - ((linkBox?.width ?? 0) * 5) / 6)
     ).toBeLessThanOrEqual(1)
+    expect((descriptionBox?.x ?? 0) + (descriptionBox?.width ?? 0)).toBeLessThan(yearBox?.x ?? 0)
   })
 
   test('SP: 説明文は写真の幅で折り返す', async ({ page }) => {
