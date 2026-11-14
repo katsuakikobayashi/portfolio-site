@@ -1,0 +1,28 @@
+/**
+ * Component 層: 見た目を変えずにタップ領域だけを広げる部品。
+ *
+ * 小さな文字リンクは文字の大きさしか反応せず、SP で押しにくい。
+ * 透明な疑似要素を要素の中央に重ね、最低でも --touch-target-* の大きさを確保する。
+ * 文字より大きい要素は広げず、そのままの大きさになる。
+ *
+ * 隣のリンクと近く、領域が重なって誤タップを招く場合は、配置側（Project 層）で
+ * --touch-target-inline-size / --touch-target-block-size を上書きして狭めること。
+ */
+@layer component {
+  .c-touch-target {
+    --touch-target-inline-size: var(--size-touch-target);
+    --touch-target-block-size: var(--size-touch-target);
+
+    /* 疑似要素の配置基準。positioned にすることで、重なった要素より手前でタップを受ける */
+    position: relative;
+    display: inline-block;
+  }
+
+  /* 要素の大きさとの差の半分ずつを上下左右に張り出す（要素の方が大きければ張り出さない） */
+  .c-touch-target::after {
+    content: '';
+    position: absolute;
+    inset-block: min(0px, calc((100% - var(--touch-target-block-size)) / 2));
+    inset-inline: min(0px, calc((100% - var(--touch-target-inline-size)) / 2));
+  }
+}

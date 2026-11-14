@@ -1,0 +1,72 @@
+---
+import PageHeader from '@/components/PageHeader.astro'
+import Profile from '@/components/Profile.astro'
+import ResponsivePicture from '@/components/ResponsivePicture.astro'
+import type { Locale } from '@/i18n/config'
+import { useTranslations } from '@/i18n/ui'
+import type { ResponsiveImage } from '@/lib/microcms/image'
+
+/**
+ * About ページ本体。
+ *
+ * PC: 左カラムにプロフィール、第 3 カラムに本文、第 4 カラムに写真。
+ *     写真は常時は出さず、本文にホバー（またはフォーカス）したときだけ表示する。
+ * SP: 上部にページヘッダー「Katsuaki Kobayashi - About」、本文のみ（写真なし）。
+ *
+ * PC のプロフィールと SP のページヘッダーは内容の異なる別 DOM のため、
+ * mFLOCSS の PC/SP 別 DOM 分岐ルールに従い `--pc` / `--sp` の対で命名する。
+ *
+ * @prop {Locale} locale - 表示ロケール
+ * @prop {string} name - 氏名（CMS: name / nameEn）
+ * @prop {string[][]} paragraphs - 本文（CMS: text / textEn を段落・行に分割済み）
+ * @prop {ResponsiveImage} photo - 写真（CMS: image）
+ * @prop {string} photoCaption - 写真クレジット（CMS: imageCaption）
+ */
+interface Props {
+  locale: Locale
+  name: string
+  paragraphs: string[][]
+  photo?: ResponsiveImage | undefined
+  photoCaption?: string | undefined
+}
+
+const { locale, name, paragraphs, photo, photoCaption } = Astro.props
+const t = useTranslations(locale)
+---
+
+<PageHeader
+  class="p-about__identity p-about__identity--sp"
+  locale={locale}
+  label={t('nav.about')}
+/>
+
+<main class="l-page__main l-grid p-about">
+  <Profile class="p-about__identity p-about__identity--pc" locale={locale} />
+
+  <article class="p-about__article">
+    <h1 class="p-about__name">{name}</h1>
+    {paragraphs.map((lines) => (
+      <p class="p-about__paragraph">
+        {lines.map((line, i) => (
+          <Fragment>
+            {i > 0 && <br />}
+            {line}
+          </Fragment>
+        ))}
+      </p>
+    ))}
+  </article>
+
+  {photo && (
+    <figure class="p-about__photo">
+      <ResponsivePicture
+        class="p-about__photo-image"
+        image={photo}
+        alt={t('about.photoAlt')}
+        loading="lazy"
+        decoding="async"
+      />
+      {photoCaption && <figcaption class="p-about__photo-caption">{photoCaption}</figcaption>}
+    </figure>
+  )}
+</main>

@@ -1,0 +1,31 @@
+# dependencies
+node_modules/
+
+# build output (Netlify がソースからビルドするため成果物は管理しない)
+dist/
+.astro/
+
+# test artifacts
+coverage/
+test-results/
+playwright-report/
+blob-report/
+.playwright/
+
+# environment
+.env
+.env.local
+.env.*.local
+.env.example
+
+# editor / OS
+.claude/
+.vscode/
+.idea/
+.DS_Store
+
+# logs
+*.log
+npm-debug.log*
+.eslintcache
+docs/design

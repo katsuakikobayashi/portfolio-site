@@ -1,0 +1,39 @@
+---
+import type { HTMLAttributes } from 'astro/types'
+import type { ResponsiveImage } from '@/lib/microcms/image'
+
+/**
+ * CMS 画像を <picture> で配信する共通部品。
+ * 対応ブラウザには <source> の AVIF を、非対応ブラウザには <img> の WebP を読み込ませる（要件⑤）。
+ *
+ * <picture> は c-picture（display: contents）で箱を作らないため、
+ * 配置・寸法・アニメーションのスタイルは従来どおり <img> のクラスに当てればよい。
+ * class / style / loading などの <img> 属性はそのまま <img> に渡す。
+ *
+ * @prop {ResponsiveImage} image - buildResponsiveImage で算出済みの画像
+ * @prop {string} alt - 代替テキスト（装飾目的なら空文字）
+ */
+type Props = Omit<
+  HTMLAttributes<'img'>,
+  'src' | 'srcset' | 'sizes' | 'width' | 'height' | 'alt'
+> & {
+  image: ResponsiveImage
+  alt: string
+}
+
+const { image, ...imageAttributes } = Astro.props
+---
+
+<picture class="c-picture">
+  {image.sources.map((source) => (
+    <source type={source.type} srcset={source.srcset} sizes={image.sizes} />
+  ))}
+  <img
+    src={image.src}
+    srcset={image.srcset}
+    sizes={image.sizes}
+    width={image.width}
+    height={image.height}
+    {...imageAttributes}
+  />
+</picture>

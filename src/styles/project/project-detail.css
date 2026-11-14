@@ -1,0 +1,234 @@
+/**
+ * Project 層: Project 詳細ページ。
+ *
+ * PC: プロフィール（左）+ 写真の縦並び（中央）+ 概要（右）。
+ *     プロフィールは position: sticky でファーストビューの位置に留める。
+ *     概要は左カラムの氏名と揃えた位置から始まり、写真と一緒にスクロールして
+ *     概要エリア全体が画面の縦中央に来たところで sticky により固定される。
+ *     概要の本文は、フッターの上端までの高さに収め、溢れた分はエリア内スクロールにする。
+ * SP: ページヘッダー → タイトル・年 → 写真 → 本文 の縦積み。
+ *     1 枚目の写真がファーストビューの下端（画面下に固定したフッターの直上）に収まるよう、タイトル位置を算出する。
+ *
+ * 写真の表示高さは「表示幅 × 縦横比」で求める。表示幅は main をコンテナにした cqi、
+ * 縦横比は CMS の画像ごとに異なるため、テンプレートから --project-lead-ratio /
+ * --project-last-ratio（1 枚目 / 最後の写真の 高さ÷幅）をインラインで受け取る。
+ */
+@layer project {
+  .p-project {
+    container-type: inline-size;
+    /* 縦に積み、ページの高さを写真の量に応じて伸ばす（他ページの縦中央配置を解除） */
+    align-self: start;
+    display: flex;
+    flex-direction: column;
+    /* 下端は固定フッターが重なるため、その高さを含めてカンプの余白を取る（PC では 0 に上書き） */
+    padding-block: 0 var(--spacing-project-end);
+
+    /* 写真の表示幅（SP: コンテンツ全幅） */
+    --project-media-inline-size: 100cqi;
+    --project-lead-block-size: calc(
+      var(--project-media-inline-size) * var(--project-lead-ratio, 1)
+    );
+    --project-last-block-size: calc(
+      var(--project-media-inline-size) * var(--project-last-ratio, 1)
+    );
+  }
+
+  /* ---------------------------------------------------------------
+   * PC / SP の切り替え（モバイルファースト）
+   * ------------------------------------------------------------- */
+  .p-project__identity--pc {
+    display: none;
+  }
+
+  /* ---------------------------------------------------------------
+   * 概要・写真（SP の並び）
+   * PC では概要（タイトル + 本文）をひとまとめに固定するため .p-project__caption で包んでいる。
+   * SP では写真をタイトルと本文の間に挟むため、包みを解除して order で並べ替える。
+   * ------------------------------------------------------------- */
+  .p-project__article {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .p-project__caption {
+    display: contents;
+  }
+
+  .p-project__header {
+    order: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    column-gap: var(--spacing-inline-group);
+    /*
+     * 1 枚目の写真の下端を「フッターの上端 - 写真間の余白」に揃える位置から逆算する。
+     * 画面が低い・写真が縦長の場合でもページヘッダーと重ならないよう、最小値を設ける。
+     */
+    margin-block: max(
+        var(--page-block-start) + var(--font-size-header) + var(--spacing-xl),
+        100svh - var(--footer-overlay-block-size) - var(--spacing-media) -
+          var(--project-lead-block-size) - var(--spacing-title-media) - var(--font-size-label)
+      )
+      var(--spacing-title-media);
+  }
+
+  .p-project__gallery {
+    order: 2;
+    display: flex;
+    flex-direction: column;
+    row-gap: var(--spacing-media);
+  }
+
+  .p-project__text {
+    order: 3;
+    margin-block-start: var(--spacing-xl);
+  }
+
+  /* ---------------------------------------------------------------
+   * タイトル・年
+   * ------------------------------------------------------------- */
+  .p-project__title {
+    font-size: var(--font-size-label);
+    letter-spacing: var(--letter-spacing-title);
+    line-height: var(--line-height-single);
+  }
+
+  .p-project__year {
+    flex-shrink: 0;
+    font-size: var(--font-size-body);
+    font-style: italic;
+    letter-spacing: var(--letter-spacing-body);
+    line-height: var(--line-height-single);
+  }
+
+  /* ---------------------------------------------------------------
+   * 本文（CMS リッチテキスト）
+   * ------------------------------------------------------------- */
+  .p-project__text {
+    font-size: var(--font-size-project-text);
+    letter-spacing: var(--letter-spacing-caption);
+    line-height: var(--line-height-loose);
+    color: var(--color-text-subtle);
+  }
+
+  .p-project__paragraph + .p-project__paragraph {
+    /* 空行 1 行ぶんの段落間隔 */
+    margin-block-start: 1lh;
+  }
+
+  /* CMS でカスタムクラスを付けた文字は黒 100% で表示する */
+  .p-project__emphasis {
+    color: var(--color-text-emphasis);
+  }
+
+  /* ---------------------------------------------------------------
+   * 写真
+   * ------------------------------------------------------------- */
+  .p-project__image {
+    inline-size: 100%;
+    block-size: auto;
+    /* 写真ごとに比率が異なるため、テンプレートから width / height と同じ比率を受け取る（CLS 対策） */
+    aspect-ratio: var(--project-image-aspect);
+  }
+
+  /* ---------------------------------------------------------------
+   * PC
+   * ------------------------------------------------------------- */
+  @media (width >= 64rem) {
+    .p-project {
+      display: grid;
+      grid-template-columns: var(--grid-columns-project-pc);
+      align-items: start;
+      padding-block: 0;
+
+      --project-media-inline-size: calc(100cqi * var(--project-media-ratio-pc));
+      /* プロフィールを画面の縦中央に置いたときの上端。概要の上端もここに揃える（カンプ指定） */
+      --project-sticky-top: var(--profile-sticky-top);
+    }
+
+    .p-project__identity--sp {
+      display: none;
+    }
+
+    .p-project__identity--pc {
+      display: flex;
+      grid-column: 1;
+      grid-row: 1;
+      position: sticky;
+      inset-block-start: var(--project-sticky-top);
+      margin-block-start: var(--project-sticky-top);
+    }
+
+    .p-project__article {
+      grid-column: 2 / -1;
+      grid-row: 1;
+      display: grid;
+      grid-template-columns: subgrid;
+      align-items: start;
+    }
+
+    /*
+     * 1 枚目の写真はファーストビューで画面の縦中央に置き、
+     * 最後の写真はスクロールし切ったときに縦中央に来るよう上下に余白を取る
+     */
+    .p-project__gallery {
+      grid-column: 1;
+      grid-row: 1;
+      padding-block: max(var(--page-block-start), (100svh - var(--project-lead-block-size)) / 2)
+        max(var(--page-block-start), (100svh - var(--project-last-block-size)) / 2);
+    }
+
+    .p-project__caption {
+      grid-column: 3;
+      grid-row: 1;
+      display: flex;
+      flex-direction: column;
+      position: sticky;
+      /*
+       * エリア全体が画面の縦中央に来る位置で固定する。エリアの高さは本文量で変わるため、
+       * scripts/project-caption.ts が計測した値（--project-caption-block-size）を使う。
+       * スクリプトが動かない場合は最大の高さ（max-block-size）を代入し、
+       * 本文がフッターに隠れない位置（上端からフッターの高さぶん下）で固定する。
+       * 高さ → 固定位置の一方向の依存にし、max-block-size には計測値を使わない（計測のループを防ぐ）。
+       */
+      inset-block-start: calc(
+        (
+            100svh -
+              var(--project-caption-block-size, (100svh - var(--footer-overlay-block-size) * 2))
+          ) /
+          2
+      );
+      /*
+       * 初期位置は、タイトルの行を左カラムの氏名（Katsuaki Kobayashi）の行と縦中央で揃える
+       * （プロフィールの上端 + 氏名とタイトルの文字サイズ差の半分。どちらも line-height: 1）。
+       * 固定位置（縦中央）より下から始まるため、固定位置に達するまでは写真と一緒に上がっていく。
+       */
+      margin-block-start: calc(
+        var(--project-sticky-top) + (var(--font-size-title) - var(--font-size-label)) / 2
+      );
+      /*
+       * 縦中央に置いたとき上下ともフッター（地色の帯）の高さぶんの余白が残るよう高さを抑え、
+       * 本文の溢れはエリア内スクロールにする。固定前は下端がフッターより下にはみ出すが、
+       * フッターの地色で隠れる
+       */
+      max-block-size: calc(100svh - var(--footer-overlay-block-size) * 2);
+    }
+
+    .p-project__header {
+      margin-block: 0 var(--spacing-md);
+    }
+
+    .p-project__text {
+      flex: 0 1 auto;
+      min-block-size: 0;
+      margin-block-start: 0;
+      overflow-y: auto;
+      /* スクロールバーは表示しない（デザイン指定）。ホイール・タッチ・キー操作ではスクロールできる */
+      scrollbar-width: none;
+    }
+
+    .p-project__text::-webkit-scrollbar {
+      display: none;
+    }
+  }
+}

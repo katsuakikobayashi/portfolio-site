@@ -1,0 +1,114 @@
+---
+import PageHeader from '@/components/PageHeader.astro'
+import Profile from '@/components/Profile.astro'
+import ResponsivePicture from '@/components/ResponsivePicture.astro'
+import type { Locale } from '@/i18n/config'
+import { useTranslations } from '@/i18n/ui'
+import type { ResponsiveImage } from '@/lib/microcms/image'
+import { PROJECT_RATIO_PROPERTY, toMediaRatio } from '@/lib/page-content'
+import type { RichTextParagraph } from '@/lib/rich-text'
+
+/**
+ * Project 詳細ページ本体。
+ *
+ * PC: 左にプロフィール、中央に写真の縦並び、右に概要（タイトル・年・本文）。
+ *     プロフィールはファーストビューの位置に固定する。概要は画面の下寄りから始まり、
+ *     写真と一緒にスクロールして、概要エリア全体が画面の縦中央に来たところで固定される。
+ *     概要の本文が長い場合は、本文エリア内でスクロールさせる（スクロールバーは非表示）。
+ * SP: ページヘッダー「Katsuaki Kobayashi - Project」→ タイトル・年 → 写真 → 本文 の順に縦積み。
+ *
+ * 固定表示は CSS の position: sticky で実現し、スクロールイベントを使わない（要件⑥）。
+ * 概要エリアの高さだけは CSS で参照できないため、scripts/project-caption.ts で計測して渡す。
+ *
+ * @prop {Locale} locale - 表示ロケール
+ * @prop {string} title - プロジェクト名（CMS: title）
+ * @prop {string} year - 年（CMS: year）
+ * @prop {RichTextParagraph[]} paragraphs - 本文（CMS: body / bodyEn を構造化済み）
+ * @prop {ResponsiveImage[]} images - 写真（CMS: images を変換済み）
+ */
+interface Props {
+  locale: Locale
+  title: string
+  year: string
+  paragraphs: RichTextParagraph[]
+  images: ResponsiveImage[]
+}
+
+const { locale, title, year, paragraphs, images } = Astro.props
+const t = useTranslations(locale)
+
+/**
+ * 1 枚目・最後の写真の縦横比（高さ / 幅）。
+ * CSS 側でファーストビューと最終スクロール位置の写真を画面の縦中央に揃えるために渡す。
+ * 下書きプレビュー（scripts/preview/project.ts）も同じ変数名で設定するため、変更時は合わせること。
+ */
+const mediaStyle = [
+  `${PROJECT_RATIO_PROPERTY.lead}: ${toMediaRatio(images.at(0))}`,
+  `${PROJECT_RATIO_PROPERTY.last}: ${toMediaRatio(images.at(-1))}`,
+].join('; ')
+---
+
+<PageHeader
+  class="p-project__identity p-project__identity--sp"
+  locale={locale}
+  label={t('project.headerLabel')}
+/>
+
+<main class="l-page__main p-project" style={mediaStyle}>
+  <Profile class="p-project__identity p-project__identity--pc" locale={locale} />
+
+  <article class="p-project__article" aria-labelledby="project-title">
+    <div class="p-project__caption js-project-caption">
+      <header class="p-project__header">
+        <h1 id="project-title" class="p-project__title">
+          {title}
+        </h1>
+        {year && <p class="p-project__year">{year}</p>}
+      </header>
+
+      {paragraphs.length > 0 && (
+        // PC ではエリア内スクロールになるため、キーボードでもスクロールできるよう tabindex を付ける
+        <section class="p-project__text" tabindex="0" aria-labelledby="project-text-heading">
+          <h2 id="project-text-heading" class="u-visually-hidden">
+            {t('project.textLabel')}
+          </h2>
+          {paragraphs.map((lines) => (
+            <p class="p-project__paragraph">
+              {lines.map((segments, i) => (
+                <Fragment>
+                  {i > 0 && <br />}
+                  {segments.map((segment) =>
+                    segment.isEmphasized ? (
+                      <span class="p-project__emphasis">{segment.text}</span>
+                    ) : (
+                      segment.text
+                    )
+                  )}
+                </Fragment>
+              ))}
+            </p>
+          ))}
+        </section>
+      )}
+    </div>
+
+    {images.length > 0 && (
+      <ol class="p-project__gallery">
+        {images.map((image, i) => (
+          <li class="p-project__gallery-item">
+            {/* 1 枚目は LCP 候補のため即時・高優先度で読み込み、2 枚目以降は遅延読み込みにする */}
+            <ResponsivePicture
+              class="p-project__image"
+              image={image}
+              style={`--project-image-aspect: ${image.width} / ${image.height}`}
+              alt={`${title} ${i + 1}`}
+              loading={i === 0 ? 'eager' : 'lazy'}
+              fetchpriority={i === 0 ? 'high' : 'auto'}
+              decoding="async"
+            />
+          </li>
+        ))}
+      </ol>
+    )}
+  </article>
+</main>

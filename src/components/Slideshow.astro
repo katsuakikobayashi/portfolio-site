@@ -1,0 +1,48 @@
+---
+import ResponsivePicture from '@/components/ResponsivePicture.astro'
+import type { TopSlide } from '@/lib/page-content'
+
+/**
+ * 写真を重ねて配置し、一定間隔でクロスフェードさせるスライドショー。
+ * 各写真は参照先プロジェクトの詳細ページへのリンクにする。
+ * 切り替えは opacity のみで行い、再レイアウトを発生させない（要件⑥）。
+ *
+ * 全画像を loading="lazy" にしているのは、SP では非表示（display: none）のため
+ * 一切ダウンロードさせないため。PC の 1 枚目は BaseLayout の preload（media 付き）で
+ * 先読みするので LCP は遅れない。
+ *
+ * 透明なスライドも同じ位置に重なっているため、表示中以外は inert にして
+ * クリックとキーボードのフォーカスが見えないリンクに当たらないようにする
+ * （切り替え時の付け替えは scripts/slideshow.ts）。
+ *
+ * @prop {TopSlide[]} slides - 写真（srcset 等を算出済み）とリンク先
+ * @prop {string} class - 配置用の追加クラス
+ */
+interface Props {
+  slides: TopSlide[]
+  class?: string
+}
+
+const { slides, class: className } = Astro.props
+---
+
+{slides.length > 0 && (
+  <ul class:list={['p-slideshow', 'js-slideshow', className]}>
+    {slides.map((slide, i) => (
+      <li
+        class:list={['p-slideshow__item', 'js-slideshow-item', i === 0 && 'is-active']}
+        inert={i !== 0}
+      >
+        <a class="p-slideshow__link" href={slide.href}>
+          <ResponsivePicture
+            class="p-slideshow__image"
+            image={slide.image}
+            alt={slide.title}
+            loading="lazy"
+            decoding="async"
+          />
+        </a>
+      </li>
+    ))}
+  </ul>
+)}

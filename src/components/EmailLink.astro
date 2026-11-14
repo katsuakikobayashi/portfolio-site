@@ -1,0 +1,21 @@
+---
+/**
+ * クリックでメールアドレスをクリップボードにコピーするリンク。
+ * Clipboard API が使えない環境や書き込みに失敗した場合は、
+ * 通常どおり mailto: リンクとして遷移する（プログレッシブエンハンスメント）。
+ */
+interface Props {
+  email: string
+  copiedLabel: string
+  class?: string
+}
+
+const { email, copiedLabel, class: className } = Astro.props
+---
+
+<a class:list={['c-link', 'js-email-link', className]} href={`mailto:${email}`} data-email={email}>
+  {email}
+</a>
+<span class="p-email-link__status" data-email-status role="status" aria-live="polite" hidden>
+  {copiedLabel}
+</span>

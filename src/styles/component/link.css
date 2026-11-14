@@ -1,0 +1,34 @@
+/**
+ * Component 層: 再利用可能な UI 部品。
+ */
+@layer component {
+  /* 下線付きテキストリンク */
+  .c-link {
+    display: inline-block;
+    color: var(--color-text);
+    text-decoration: underline;
+    text-decoration-thickness: var(--underline-thickness);
+    text-underline-offset: var(--underline-offset);
+    transition: opacity var(--duration-normal) var(--ease-out-cubic);
+  }
+
+  @media (any-hover: hover) {
+    .c-link:hover {
+      opacity: var(--opacity-hover);
+    }
+  }
+
+  /* メールアドレスのコピー完了を伝えるステータステキスト */
+  .p-email-link__status {
+    margin-inline-start: 0.6em;
+    color: var(--color-text-muted);
+  }
+
+  .p-email-link__status::before {
+    content: '(';
+  }
+
+  .p-email-link__status::after {
+    content: ')';
+  }
+}

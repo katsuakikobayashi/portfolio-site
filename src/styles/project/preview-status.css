@@ -1,0 +1,20 @@
+/**
+ * Project 層: 下書きプレビュー（/preview/）の状態表示（読み込み中・表示中・エラー）。
+ * 公開ページと見分けがつくよう、画面右上に反転色のラベルとして常時表示する。
+ */
+@layer project {
+  .p-preview-status {
+    position: fixed;
+    inset-block-start: var(--spacing-caption);
+    inset-inline-end: var(--spacing-caption);
+    z-index: var(--z-index-preview-status);
+    padding-block: var(--spacing-caption);
+    padding-inline: var(--spacing-xs);
+    font-size: var(--font-size-fine);
+    letter-spacing: var(--letter-spacing-fine);
+    line-height: var(--line-height-single);
+    color: var(--color-bg);
+    background-color: var(--color-text);
+    pointer-events: none;
+  }
+}

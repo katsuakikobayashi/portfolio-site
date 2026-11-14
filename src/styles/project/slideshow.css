@@ -1,0 +1,39 @@
+/**
+ * Project 層: クロスフェードのスライドショー。
+ * すべてのスライドを同じグリッドセルに重ね、表示中（.is-active）のみ不透明にする。
+ * 切り替えは opacity のみで行い、再レイアウトを発生させない。
+ */
+@layer project {
+  .p-slideshow {
+    display: grid;
+  }
+
+  .p-slideshow__item {
+    grid-area: 1 / 1;
+    opacity: 0;
+    transition: opacity var(--duration-slow) var(--ease-in-out);
+  }
+
+  .p-slideshow__item.is-active {
+    opacity: 1;
+  }
+
+  /* 写真全体をリンクの押下範囲にする（<picture> は display: contents のため <img> が直接の中身になる） */
+  .p-slideshow__link {
+    display: block;
+    transition: opacity var(--duration-normal) var(--ease-out-cubic);
+  }
+
+  @media (any-hover: hover) {
+    .p-slideshow__link:hover {
+      opacity: var(--opacity-hover);
+    }
+  }
+
+  .p-slideshow__image {
+    inline-size: 100%;
+    block-size: auto;
+    aspect-ratio: var(--media-aspect);
+    object-fit: cover;
+  }
+}

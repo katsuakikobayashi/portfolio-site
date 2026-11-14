@@ -1,0 +1,149 @@
+---
+import { Font } from 'astro:assets'
+import Analytics from '@/components/Analytics.astro'
+import PreviewLoader from '@/components/PreviewLoader.astro'
+import { SITE, parseDisciplines } from '@/data/site'
+import { HREF_LANG, HTML_LANG, LOCALES, OG_LOCALE, type Locale } from '@/i18n/config'
+import { useTranslations } from '@/i18n/ui'
+import { getAlternatePath } from '@/i18n/utils'
+import { toPreviewFallbackPath, type PreviewPage } from '@/lib/preview'
+import '@/styles/index.css'
+
+interface Props {
+  locale: Locale
+  title: string
+  description: string
+  /**
+   * 和文フォント（Noto Sans JP）を読み込むか。
+   * Noto Sans JP の @font-face 定義は 125 サブセットぶんあり HTML を約 30KB 増やすため、
+   * 日本語の本文を実際に持つページでのみ true にすること。
+   */
+  withJapaneseFont?: boolean
+  /**
+   * ファーストビューの主要画像（LCP 候補）。指定時は <link rel="preload"> を出力する。
+   * media を指定すると、その条件に合う端末でのみ先読みする（SP で非表示の画像を落とさない）。
+   * type / srcset は <picture> で最優先される <source> と一致させること（getPreferredSource）。
+   * type に非対応のブラウザは preload を読み込まないため、二重ダウンロードにならない。
+   */
+  preloadImage?: PreloadImage | undefined
+  /** 検索エンジンにインデックスさせないページ（仮ページなど）で true にする */
+  noindex?: boolean
+  /**
+   * microCMS の下書きプレビューとして出力する場合のページの種類。
+   * 指定時は noindex にし、下書きをブラウザで取得・描画するスクリプトを読み込む。
+   */
+  previewPage?: PreviewPage | undefined
+}
+
+interface PreloadImage {
+  type: string
+  srcset: string
+  sizes: string
+  media?: string
+}
+
+const {
+  locale,
+  title,
+  description,
+  withJapaneseFont = false,
+  preloadImage,
+  noindex = false,
+  previewPage,
+} = Astro.props
+const t = useTranslations(locale)
+
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site)
+const ogImageUrl = new URL(SITE.ogImagePath, Astro.site)
+const alternates = LOCALES.map((alternateLocale) => ({
+  locale: alternateLocale,
+  href: new URL(getAlternatePath(Astro.url.pathname, alternateLocale), Astro.site).href,
+}))
+
+/**
+ * Person の構造化データ（JSON-LD）。
+ * ページ間で共通の人物情報に、そのページの description を添えて出力する。
+ */
+const personJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: SITE.name,
+  url: canonicalUrl.href,
+  image: ogImageUrl.href,
+  jobTitle: t('top.role'),
+  knowsAbout: parseDisciplines(t('top.disciplines')),
+  description,
+  email: `mailto:${SITE.email}`,
+  sameAs: [SITE.instagramUrl],
+  inLanguage: HTML_LANG[locale],
+}
+---
+
+<!doctype html>
+<html lang={HTML_LANG[locale]}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {(noindex || previewPage) && <meta name="robots" content="noindex" />}
+    {previewPage && (
+      // JS 無効時は下書きを描画できないため、公開中のページへ移動させる
+      // （クエリの有無による出し分けは JS 側で行う。静的 HTML の meta refresh では判定できないため）
+      <noscript>
+        <meta
+          http-equiv="refresh"
+          content={`0; url=${toPreviewFallbackPath(previewPage, locale)}`}
+        />
+      </noscript>
+    )}
+    <link rel="canonical" href={canonicalUrl.href} />
+    {alternates.map((alternate) => (
+      <link rel="alternate" hreflang={HREF_LANG[alternate.locale]} href={alternate.href} />
+    ))}
+    <link rel="alternate" hreflang="x-default" href={new URL('/', Astro.site).href} />
+
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/favicon.png" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl.href} />
+    <meta property="og:locale" content={OG_LOCALE[locale]} />
+    <meta property="og:image" content={ogImageUrl.href} />
+    <meta property="og:image:width" content={String(SITE.ogImageWidth)} />
+    <meta property="og:image:height" content={String(SITE.ogImageHeight)} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <Font cssVariable="--font-roboto" preload />
+    {withJapaneseFont && <Font cssVariable="--font-noto-sans-jp" />}
+    {preloadImage && (
+      <link
+        rel="preload"
+        as="image"
+        type={preloadImage.type}
+        imagesrcset={preloadImage.srcset}
+        imagesizes={preloadImage.sizes}
+        media={preloadImage.media}
+        fetchpriority="high"
+      />
+    )}
+
+    <script
+      is:inline
+      type="application/ld+json"
+      set:html={JSON.stringify(personJsonLd).replace(/</g, '\\u003c')}
+    ></script>
+    <Analytics />
+  </head>
+  <body class="l-page">
+    {previewPage && <PreviewLoader locale={locale} page={previewPage} />}
+    <slot />
+    <script>
+      // 全ページの JS を 1 ファイルにまとめて読み込む（理由は main.ts を参照）
+      import '@/scripts/main'
+    </script>
+  </body>
+</html>

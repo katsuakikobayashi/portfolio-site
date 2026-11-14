@@ -1,0 +1,54 @@
+---
+import ProjectDetailView from '@/components/ProjectDetailView.astro'
+import SiteFooter from '@/components/SiteFooter.astro'
+import type { Locale } from '@/i18n/config'
+import { useTranslations } from '@/i18n/ui'
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import { getPreferredSource } from '@/lib/microcms/image'
+import { EMPTY_PROJECT_VIEW, toProjectPageTitle, toProjectView } from '@/lib/page-content'
+import type { Project } from '@/lib/project'
+
+/**
+ * Project 詳細ページ（ja / en 共通）。
+ * 1 枚目の写真は PC / SP ともにファーストビューの主要画像のため preload する。
+ *
+ * フッターは写真の上に重ねて表示し（isOverlay）、一覧へ戻れるよう current を指定しない。
+ *
+ * @prop {Locale} locale - 表示ロケール
+ * @prop {Project} project - 表示するプロジェクト（getStaticPaths の props）。下書きプレビューでは指定しない
+ * @prop {boolean} isPreview - 下書きプレビュー（/preview/projects/）として出力するか。
+ *   true の場合は空の状態で出力し、下書きはブラウザで取得して描画する
+ */
+type Props = { locale: Locale } & (
+  { project: Project; isPreview?: false } | { project?: undefined; isPreview: true }
+)
+
+const { locale, project, isPreview = false } = Astro.props
+const t = useTranslations(locale)
+const view = project ? toProjectView(project, locale) : EMPTY_PROJECT_VIEW
+const [firstImage] = view.images
+---
+
+<BaseLayout
+  locale={locale}
+  title={toProjectPageTitle(view.title, locale)}
+  description={view.description || t('meta.description')}
+  withJapaneseFont={locale === 'ja'}
+  previewPage={isPreview ? 'project' : undefined}
+  preloadImage={firstImage && { ...getPreferredSource(firstImage), sizes: firstImage.sizes }}
+>
+  <ProjectDetailView
+    locale={locale}
+    title={view.title}
+    year={view.year}
+    paragraphs={view.paragraphs}
+    images={view.images}
+  />
+  <SiteFooter
+    locale={locale}
+    pathname={Astro.url.pathname}
+    parent="projects"
+    contactAlign="content"
+    isOverlay
+  />
+</BaseLayout>

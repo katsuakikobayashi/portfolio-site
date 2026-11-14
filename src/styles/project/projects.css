@@ -1,0 +1,180 @@
+/**
+ * Project 層: Projects 一覧ページ。
+ *
+ * PC: プロフィール（第 1〜2 カラム）+ 一覧（第 3 カラム）+ サムネイル（第 4 カラム右寄せ・画面の縦中央に固定）。
+ *     サムネイルは項目にホバー / フォーカスしたときだけ表示する。
+ *     Project 詳細と同じく、プロフィールは画面の縦中央に固定して一覧だけをスクロールさせ、
+ *     スクロールし切ったときに最後の項目が画面の縦中央に来るよう一覧の下に余白を取る。
+ * SP: ページヘッダー（PageHeader.astro）+ 一覧（各項目の説明の下にサムネイルを常時表示）。
+ *     写真の分だけ縦に長くなるため、縦中央配置を解除して上から並べる。
+ *     フッターは画面下端に固定して写真に重ねる（SiteFooter の isOverlay）。
+ */
+@layer project {
+  /* ---------------------------------------------------------------
+   * ページ全体（SP）
+   * ------------------------------------------------------------- */
+  .p-projects {
+    align-self: start;
+    /*
+     * 上: ページヘッダーの下端から --spacing-projects-item-sp（カンプ）の位置に 1 件目を置く。
+     * 下: 画面下端に固定したフッターが重なるため、その高さを含めてカンプの余白を取る
+     */
+    padding-block: calc(
+        var(--page-block-start) + var(--font-size-header) + var(--spacing-projects-item-sp)
+      )
+      var(--spacing-projects-end);
+  }
+
+  /* ---------------------------------------------------------------
+   * PC / SP の切り替え（モバイルファースト）
+   * ------------------------------------------------------------- */
+  .p-projects__identity--pc {
+    display: none;
+  }
+
+  /* ---------------------------------------------------------------
+   * 一覧
+   * ------------------------------------------------------------- */
+  .p-projects__list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* 項目間の余白。PC で一覧の前後に余白用の疑似要素を置くため、row-gap ではなく margin で取る */
+  .p-projects__item + .p-projects__item {
+    margin-block-start: var(--spacing-projects-item-sp);
+  }
+
+  /* タイトルと年を 1 行目の左右に、説明を 2 行目に、サムネイルを 3 行目に置く */
+  .p-projects__link {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+    column-gap: var(--spacing-inline-group);
+    color: var(--color-text);
+  }
+
+  .p-projects__title,
+  .p-projects__year,
+  .p-projects__description {
+    transition: opacity var(--duration-normal) var(--ease-out-cubic);
+  }
+
+  /*
+   * ホバー時は文字だけを薄くする。リンク全体に opacity を掛けると、
+   * リンク内に置いたサムネイル（PC ではホバーで表示する写真）まで薄くなるため
+   */
+  @media (any-hover: hover) {
+    .p-projects__link:hover :is(.p-projects__title, .p-projects__year, .p-projects__description) {
+      opacity: var(--opacity-hover);
+    }
+  }
+
+  .p-projects__title {
+    font-size: var(--font-size-label);
+    letter-spacing: var(--letter-spacing-title);
+    line-height: var(--line-height-single);
+  }
+
+  .p-projects__year {
+    font-size: var(--font-size-note);
+    font-style: italic;
+    letter-spacing: var(--letter-spacing-body);
+    line-height: var(--line-height-single);
+  }
+
+  /* SP では説明文を写真の幅で折り返す（% の基準はどちらもリンクの幅） */
+  .p-projects__description {
+    grid-column: 1 / -1;
+    max-inline-size: var(--projects-thumbnail-inline-size-sp);
+    margin-block-start: var(--spacing-xs);
+    font-size: var(--font-size-note);
+    font-style: italic;
+    /* Project 詳細の概要の本文と同じ字間にする（デザイン指定） */
+    letter-spacing: var(--letter-spacing-caption);
+    line-height: var(--line-height-base);
+    color: var(--color-text-subtle);
+  }
+
+  /* <picture> は display: contents のため、<img> がリンクのグリッドの直接の項目になる */
+  .p-projects__thumbnail {
+    grid-column: 1 / -1;
+    inline-size: var(--projects-thumbnail-inline-size-sp);
+    block-size: auto;
+    aspect-ratio: var(--media-aspect);
+    object-fit: cover;
+    margin-block-start: var(--spacing-description-media);
+  }
+
+  @media (width >= 64rem) {
+    .p-projects {
+      /*
+       * 一覧の上下の余白（画面の高さ基準）は .p-projects__body で取るため、main の余白は持たない。
+       * 一覧の下の余白で常に画面より高くなるため、上詰め（SP と同じ）のままにする
+       */
+      align-items: start;
+      padding-block: 0;
+    }
+
+    .p-projects__identity--sp {
+      display: none;
+    }
+
+    /* 一覧をスクロールしてもプロフィールは他ページと同じ画面の縦中央に留める（Project 詳細と同じ） */
+    .p-projects__identity--pc {
+      display: flex;
+      grid-column: 1 / 3;
+      position: sticky;
+      inset-block-start: var(--profile-sticky-top);
+      margin-block-start: var(--profile-sticky-top);
+    }
+
+    /*
+     * 上: 一覧の上端を画面の高さに対する比率（--projects-list-start）の位置に置く（カンプ指定）。
+     * 下: スクロールし切ったときに最後の項目が画面の縦中央に来る余白（--projects-list-end）を取る。
+     *     画面が低く一覧が固定フッターに重なる場合も、スクロールすれば最後の項目まで見られる
+     */
+    .p-projects__body {
+      grid-column: 3;
+      /* 文章の幅はフッターの Contact〜instagram の 1 行に揃える（右端の年が instagram の右端に揃う） */
+      inline-size: var(--contact-line-inline-size);
+      padding-block: var(--projects-list-start) var(--projects-list-end);
+    }
+
+    .p-projects__item + .p-projects__item {
+      margin-block-start: var(--spacing-list-item);
+    }
+
+    /* PC の説明文は項目全体の幅の 5 分の 4 で折り返す（サムネイルは別の位置に出るため写真の幅に合わせない） */
+    .p-projects__description {
+      max-inline-size: var(--projects-description-inline-size);
+    }
+
+    /*
+     * サムネイルは各項目の DOM 内に置きつつ、画面に固定（position: fixed）して
+     * 画面の高さの縦中央・コンテンツの右端（第 4 カラム右端）に表示する。
+     * 一覧がスクロールしても常に画面の縦中央に出るよう、一覧ではなく画面を基準にしている。
+     * 縦中央は inset-block: 0 + margin-block: auto で取る（画像は縦横比から高さが決まるため、
+     * 上下の余りが均等に配分される。transform を使わずに済む）。
+     * 全項目のサムネイルが同じ位置に重なり、ホバー中の項目のものだけを opacity で表示する
+     * （レイアウトは常に確保され、ずれない）。
+     * 2 件目以降は loading="lazy" だが表示領域内にあるため、ホバー前に読み込みが完了する。
+     */
+    .p-projects__thumbnail {
+      position: fixed;
+      inset-block: 0;
+      inset-inline-end: var(--projects-thumbnail-inset-inline-end);
+      inline-size: var(--projects-thumbnail-inline-size);
+      margin-block: auto;
+      opacity: 0;
+      /* サムネイル上にポインタが残っても、別の項目へのホバーを妨げない */
+      pointer-events: none;
+      transition: opacity var(--duration-normal) var(--ease-out-cubic);
+    }
+
+    .p-projects__card:has(.p-projects__link:hover, .p-projects__link:focus-visible)
+      .p-projects__thumbnail {
+      opacity: 1;
+    }
+  }
+}

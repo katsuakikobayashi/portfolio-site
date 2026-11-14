@@ -1,0 +1,147 @@
+---
+import EmailLink from '@/components/EmailLink.astro'
+import LangSwitch from '@/components/LangSwitch.astro'
+import { ROUTES, SITE, formatCopyright, type RouteName } from '@/data/site'
+import type { Locale } from '@/i18n/config'
+import { useTranslations, type UiKey } from '@/i18n/ui'
+import { localizePath } from '@/i18n/utils'
+
+/** Contact ブロックを揃える基準（site-footer.css の `--contact-{値}-center` と一致させること） */
+export type ContactAlign = 'column' | 'content'
+
+/**
+ * サイト共通フッター（ページナビ・Contact・言語切り替え・コピーライト）。
+ *
+ * PC ではナビを常時 1 行で表示し、SP ではナビを「＋」ボタンで開閉するメニューにする。
+ * PC / SP で並びが変わるだけで内容は同一のため、DOM は 1 つに保ち
+ * （メールリンクの重複出力を避ける）、配置の切り替えは site-footer.css 側で行う。
+ *
+ * @prop {Locale} locale - 表示ロケール
+ * @prop {string} pathname - 現在のパス（言語切り替え先の算出に使用）
+ * @prop {RouteName} current - 現在のページ。該当リンクを取り消し線の非リンク表示にする。
+ *   Project 詳細のように一覧へ戻る導線を残したいページでは指定せず、parent を使う
+ * @prop {RouteName} parent - 現在のページの親（一覧）ページ。該当リンクを取り消し線 + 左矢印（←）の
+ *   「戻る」リンクにする（Project 詳細 → Projects 一覧）。現在地に近いことを取り消し線で示しつつ、
+ *   一覧へ戻る導線としてリンクは残す（デザイン指定）
+ * @prop {boolean} isOverlay - 写真の上に重ねて表示するか（Project 詳細・Projects 一覧）。
+ *   PC / SP とも画面下端に固定し、地色で背面の写真を隠す
+ * @prop {ContactAlign} contactAlign - PC で Contact〜instagram のブロックを、ページの写真の左右中央に揃える基準。
+ *   'column': 第 3 カラムの中央（TOP。写真が第 3 カラムいっぱいに置かれる）
+ *   'content': コンテンツ幅の中央（Project 詳細。独自グリッドの写真カラムの中心がコンテンツの中央になる）
+ *   未指定なら第 3 カラムの左端に揃える
+ */
+interface Props {
+  locale: Locale
+  pathname: string
+  current?: RouteName | undefined
+  parent?: RouteName | undefined
+  isOverlay?: boolean
+  contactAlign?: ContactAlign | undefined
+}
+
+const { locale, pathname, current, parent, isOverlay = false, contactAlign } = Astro.props
+const t = useTranslations(locale)
+const copyright = formatCopyright(new Date().getFullYear())
+const menuId = 'site-menu'
+
+/** フッターナビに並べるページ（表示順） */
+const PAGE_LINKS = [
+  { route: 'projects', labelKey: 'nav.projects' },
+  { route: 'about', labelKey: 'nav.about' },
+] as const satisfies readonly { route: RouteName; labelKey: UiKey }[]
+
+/** ナビの矢印。進む先のページは右向き、現在地・戻り先のページは左向きにする */
+const ARROW = { forward: '→', back: '←' } as const
+
+const pages = PAGE_LINKS.map(({ route, labelKey }) => ({
+  label: t(labelKey),
+  href: localizePath(ROUTES[route], locale),
+  isCurrent: route === current,
+  isParent: route === parent,
+}))
+---
+
+<footer
+  class:list={[
+    'l-page__footer',
+    'p-site-footer',
+    isOverlay && 'p-site-footer--overlay',
+    contactAlign && `p-site-footer--contact-${contactAlign}-center`,
+    'js-site-footer',
+  ]}
+>
+  <nav id={menuId} class="p-site-footer__nav" aria-label={t('a11y.siteNav')}>
+    <ul class="p-site-footer__pages">
+      {pages.map((page) => (
+        <li class="p-site-footer__page">
+          {page.isCurrent ? (
+            <span class="p-site-footer__link p-site-footer__link--current" aria-current="page">
+              <span class="p-site-footer__label">{page.label}</span>
+              <span class="p-site-footer__arrow" aria-hidden="true">
+                {ARROW.back}
+              </span>
+            </span>
+          ) : (
+            <a
+              class:list={[
+                'p-site-footer__link',
+                page.isParent && 'p-site-footer__link--parent',
+                'c-touch-target',
+              ]}
+              href={page.href}
+            >
+              <span class="p-site-footer__label">{page.label}</span>
+              <span class="p-site-footer__arrow" aria-hidden="true">
+                {page.isParent ? ARROW.back : ARROW.forward}
+              </span>
+            </a>
+          )}
+        </li>
+      ))}
+    </ul>
+
+    <section class="p-site-footer__contact" aria-labelledby="site-footer-contact">
+      <h2 id="site-footer-contact" class="p-site-footer__contact-heading">
+        {t('contact.heading')}
+        <span class="p-site-footer__arrow" aria-hidden="true">
+          {ARROW.forward}
+        </span>
+      </h2>
+      <ul class="p-site-footer__contact-list">
+        <li class="p-site-footer__contact-item">
+          <EmailLink
+            class="p-site-footer__contact-link c-touch-target"
+            email={SITE.email}
+            copiedLabel={t('contact.copied')}
+          />
+        </li>
+        <li class="p-site-footer__contact-item">
+          <a
+            class="p-site-footer__contact-link c-link c-touch-target"
+            href={SITE.instagramUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {t('contact.instagram')}
+          </a>
+        </li>
+      </ul>
+    </section>
+  </nav>
+
+  <div class="p-site-footer__meta">
+    <LangSwitch class="p-site-footer__lang" locale={locale} pathname={pathname} />
+    <p class="p-site-footer__copyright">
+      <small>{copyright}</small>
+    </p>
+  </div>
+
+  <button
+    type="button"
+    class="p-site-footer__toggle js-site-menu-toggle"
+    aria-expanded="false"
+    aria-controls={menuId}
+  >
+    <span class="u-visually-hidden">{t('a11y.menu')}</span>
+  </button>
+</footer>
