@@ -71,10 +71,20 @@ test.describe('Projects 一覧', () => {
     await expect(nav.locator('[aria-current="page"]')).toContainText('Projects')
   })
 
-  test('斜体の年・説明は 10.5px で表示する', async ({ page }) => {
+  test('斜体の年・説明は 10px で表示する', async ({ page }) => {
     await page.goto('/projects/')
-    await expect(page.locator('.p-projects__year').first()).toHaveCSS('font-size', '10.5px')
-    await expect(page.locator('.p-projects__description').first()).toHaveCSS('font-size', '10.5px')
+    await expect(page.locator('.p-projects__year').first()).toHaveCSS('font-size', '10px')
+    await expect(page.locator('.p-projects__description').first()).toHaveCSS('font-size', '10px')
+  })
+
+  test('説明文の字間は Project 詳細の概要の本文と同じ', async ({ page }) => {
+    await page.goto('/projects/')
+    const descriptionSpacing = await page
+      .locator('.p-projects__description')
+      .first()
+      .evaluate((element) => getComputedStyle(element).letterSpacing)
+    await openFirstProject(page)
+    await expect(page.locator('.p-project__text')).toHaveCSS('letter-spacing', descriptionSpacing)
   })
 
   test('サムネイルは WebP の srcset と寸法を持つ', async ({ page }) => {
@@ -184,7 +194,8 @@ test.describe('Projects 一覧', () => {
     await expectHeaderLinksToTop(page)
   })
 
-  test('説明文は項目全体の幅の 3 分の 2 で折り返す', async ({ page }) => {
+  test('PC: 説明文は項目全体の幅の 5 分の 4 で折り返す', async ({ page }) => {
+    test.skip(!isPcViewport(page), 'PC のみの仕様')
     await page.goto('/projects/')
     const card = page
       .locator('.p-projects__card')
@@ -192,7 +203,23 @@ test.describe('Projects 一覧', () => {
       .first()
     const descriptionBox = await card.locator('.p-projects__description').boundingBox()
     const linkBox = await card.locator('.p-projects__link').boundingBox()
-    expect(descriptionBox?.width ?? Infinity).toBeLessThanOrEqual((linkBox?.width ?? 0) * 0.75 + 1)
+    expect(
+      Math.abs((descriptionBox?.width ?? 0) - (linkBox?.width ?? 0) * 0.8)
+    ).toBeLessThanOrEqual(1)
+  })
+
+  test('SP: 説明文は写真の幅で折り返す', async ({ page }) => {
+    test.skip(isPcViewport(page), 'SP のみの仕様')
+    await page.goto('/projects/')
+    const card = page
+      .locator('.p-projects__card')
+      .filter({ has: page.locator('.p-projects__description') })
+      .first()
+    const descriptionBox = await card.locator('.p-projects__description').boundingBox()
+    const thumbnailBox = await card.locator('.p-projects__thumbnail').boundingBox()
+    expect(Math.abs((descriptionBox?.width ?? 0) - (thumbnailBox?.width ?? 0))).toBeLessThanOrEqual(
+      1
+    )
   })
 
   test('SP: 写真をタップすると詳細ページへ移動する', async ({ page }) => {
@@ -274,9 +301,9 @@ test.describe('Project 詳細', () => {
     await expect(page.locator('.p-project__text')).not.toHaveCSS('color', black)
   })
 
-  test('概要の本文は 10.5px で表示する', async ({ page }) => {
+  test('概要の本文は 10px で表示する', async ({ page }) => {
     await openFirstProject(page)
-    await expect(page.locator('.p-project__text')).toHaveCSS('font-size', '10.5px')
+    await expect(page.locator('.p-project__text')).toHaveCSS('font-size', '10px')
   })
 
   test('フッターの Projects は一覧へ戻るリンクになっている', async ({ page }) => {

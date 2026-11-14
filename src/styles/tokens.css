@@ -56,7 +56,7 @@
     --size-text-11-5: calc(11.5 * var(--px));
     --size-text-12: calc(12 * var(--px));
     --size-text-12-13: calc(12 * var(--px) + 1 * var(--fluid));
-    --size-text-12-17: calc(12 * var(--px) + 5 * var(--fluid));
+    --size-text-14: calc(14 * var(--px));
     --size-text-13: calc(13 * var(--px));
     --size-text-15-17: calc(15 * var(--px) + 2 * var(--fluid));
     /*
@@ -104,8 +104,8 @@
     --grid-columns-2: minmax(calc(113 * var(--px)), 113fr) minmax(0, 216fr);
     /* SP の左寄せの写真（270px）の幅がコンテンツ幅（329px）に占める比率 = 270 / 329 */
     --grid-content-sp-photo: 82.0669%;
-    /* 全体の幅の 3 分の 2 */
-    --grid-fraction-2-3: calc(200% / 3);
+    /* 全体の幅の 5 分の 4 */
+    --grid-fraction-4-5: 80%;
     /* About 写真の幅が第 4 カラムに占める比率 = 300 / 451 */
     --grid-column-4-photo: 66.52%;
     /* 第 4 カラム右寄せの写真（300px）の幅がコンテンツ幅（1280px）に占める比率 = 300 / 1280 */

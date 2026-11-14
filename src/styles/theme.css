@@ -32,12 +32,10 @@
      * ------------------------------------------------------------- */
     --font-size-title: var(--size-text-15-17); /* 氏名 */
     /*
-     * About の氏名・本文（デザイン指定）。SP は日英共通で氏名 12px・本文 10.5px。
-     * PC は欧文の氏名を 12px〜17px で可変、和文の氏名を 11.5px（全角は字面が大きく見えるため欧文より小さく）、
-     * 本文を --font-size-body にする（このファイル末尾のメディアクエリ）
+     * About の氏名・本文（デザイン指定・日英共通）。SP は氏名 12px・本文 10.5px。
+     * PC は氏名 14px、本文を --font-size-body にする（このファイル末尾のメディアクエリ）
      */
     --font-size-about-name: var(--size-text-12);
-    --font-size-about-name-ja: var(--size-text-12);
     --font-size-about-text: var(--size-text-10-5);
     --font-size-label: var(--size-text-12-13); /* 肩書き・フッターナビ（PC） */
     /*
@@ -53,10 +51,10 @@
     --font-size-body: var(--size-text-10-12); /* 本文・リンク */
     --font-size-header: var(--size-text-13); /* SP ページヘッダー */
     --font-size-fine: var(--size-text-10); /* 写真クレジット・下書きプレビューの状態表示 */
-    /* Projects 一覧の斜体（年・説明）。PC / SP 共通で 10.5px 固定（デザイン指定） */
-    --font-size-note: var(--size-text-10-5);
-    /* Project 詳細の概要の本文。PC / SP 共通で 10.5px 固定（デザイン指定） */
-    --font-size-project-text: var(--size-text-10-5);
+    /* Projects 一覧の斜体（年・説明）。PC / SP 共通で 10px 固定（デザイン指定） */
+    --font-size-note: var(--size-text-10);
+    /* Project 詳細の概要の本文。PC / SP 共通で 10px 固定（デザイン指定） */
+    --font-size-project-text: var(--size-text-10);
 
     /* ---------------------------------------------------------------
      * 字間（カンプの文字列幅の実測から逆算）
@@ -65,7 +63,7 @@
     --letter-spacing-label: 0.08em;
     --letter-spacing-body: 0.1em;
     --letter-spacing-fine: 0.1em;
-    --letter-spacing-caption: 0.16em; /* Project 詳細の概要 */
+    --letter-spacing-caption: 0.16em; /* Project 詳細の概要・Projects 一覧の説明 */
     /* 和文は全角の字幅が広いため、カンプの行長（「…主軸に、」まで 1 行）に合わせて別値を持つ */
     --letter-spacing-title-ja: 0.56em;
     --letter-spacing-prose-ja: var(--size-tracking-0-1-0-66);
@@ -151,10 +149,10 @@
       (100% - var(--page-inline) * 2) * var(--grid-content-photo-ratio)
     );
     --projects-thumbnail-inset-inline-end: var(--page-inline);
-    /* Projects 一覧（SP）のサムネイル。コンテンツ幅に対する比率 */
+    /* Projects 一覧（SP）のサムネイル。コンテンツ幅に対する比率で、説明文の折り返し幅にも使う */
     --projects-thumbnail-inline-size-sp: var(--grid-content-sp-photo);
-    /* Projects 一覧（PC / SP）の説明文（斜体）の折り返し幅。項目全体の幅の 3 分の 2（デザイン指定） */
-    --projects-description-inline-size: var(--grid-fraction-2-3);
+    /* Projects 一覧（PC）の説明文（斜体）の折り返し幅。項目全体の幅の 5 分の 4（デザイン指定） */
+    --projects-description-inline-size: var(--grid-fraction-4-5);
     /* Projects 一覧（PC）: 一覧の上端の位置（画面の高さに対する比率。カンプ: 980px 高で上端 約 318px） */
     --projects-list-start: var(--size-viewport-block-32-4);
     /*
@@ -216,8 +214,7 @@
       --font-size-footer: var(--font-size-label);
       --font-size-lang: var(--font-size-label);
       --font-size-disciplines: var(--font-size-body);
-      --font-size-about-name: var(--size-text-12-17);
-      --font-size-about-name-ja: var(--size-text-11-5);
+      --font-size-about-name: var(--size-text-14);
       --font-size-about-text: var(--font-size-body);
     }
   }
