@@ -40,6 +40,36 @@ test.describe('TOP ページ', () => {
     await expect(page.locator('[data-email-status]')).toBeVisible()
   })
 
+  test('PC: Contact〜instagram のブロックは写真の左右中央に揃う', async ({ page }) => {
+    test.skip(!isPcViewport(page), 'PC のみの仕様')
+    const contactBox = await page.locator('.p-site-footer__contact').boundingBox()
+    const slideshowBox = await page.locator('.p-slideshow').boundingBox()
+    const centerX = (box: typeof contactBox): number => (box?.x ?? 0) + (box?.width ?? 0) / 2
+    expect(Math.abs(centerX(contactBox) - centerX(slideshowBox))).toBeLessThanOrEqual(1)
+  })
+
+  test('SP: 肩書き・フッターのナビ・言語切り替え・コピーライトは 11px で表示する', async ({
+    page,
+  }) => {
+    test.skip(isPcViewport(page), 'SP のみの仕様')
+    await expect(page.locator('.p-profile__role')).toHaveCSS('font-size', '11px')
+    await openMenuIfCollapsed(page)
+    await expect(page.locator('.p-site-footer__page').first()).toHaveCSS('font-size', '11px')
+    await expect(page.locator('.p-site-footer__contact-heading')).toHaveCSS('font-size', '11px')
+    await expect(page.locator('.p-site-footer__lang')).toHaveCSS('font-size', '11px')
+    await expect(page.locator('.p-site-footer__copyright')).toHaveCSS('font-size', '11px')
+  })
+
+  test('SP: メニューのメールと instagram の間隔は 12px', async ({ page }) => {
+    test.skip(isPcViewport(page), 'SP のみの仕様')
+    await openMenuIfCollapsed(page)
+    const items = page.locator('.p-site-footer__contact-item')
+    const emailBox = await items.nth(0).boundingBox()
+    const instagramBox = await items.nth(1).boundingBox()
+    const gap = (instagramBox?.y ?? 0) - (emailBox?.y ?? 0) - (emailBox?.height ?? 0)
+    expect(gap).toBeCloseTo(12, 0)
+  })
+
   test('html の lang 属性が ja である', async ({ page }) => {
     await expect(page.locator('html')).toHaveAttribute('lang', 'ja')
   })

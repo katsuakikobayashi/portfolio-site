@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-import { isPcViewport, openMenuIfCollapsed } from './helpers'
+import { getContactLineEdges, isPcViewport, openMenuIfCollapsed } from './helpers'
 
 /**
  * Projects の内容は microCMS（`projects`）に依存するため、
@@ -48,6 +48,12 @@ test.describe('Projects 一覧', () => {
     await expect(nav.locator('[aria-current="page"]')).toContainText('Projects')
   })
 
+  test('斜体の年・説明は 10px で表示する', async ({ page }) => {
+    await page.goto('/projects/')
+    await expect(page.locator('.p-projects__year').first()).toHaveCSS('font-size', '10px')
+    await expect(page.locator('.p-projects__description').first()).toHaveCSS('font-size', '10px')
+  })
+
   test('サムネイルは WebP の srcset と寸法を持つ', async ({ page }) => {
     await page.goto('/projects/')
     const thumbnail = page.locator('.p-projects__thumbnail').first()
@@ -72,13 +78,57 @@ test.describe('Projects 一覧', () => {
     await expect(first).toHaveCSS('opacity', '0')
   })
 
-  test('PC: サムネイルの上端は一覧の上端（1 件目）に揃う', async ({ page }) => {
+  test('PC: サムネイルは画面の高さの縦中央に表示する', async ({ page }) => {
     test.skip(!isPcViewport(page), 'PC のみの仕様')
     await page.goto('/projects/')
     await page.locator('.p-projects__link').first().hover()
     const thumbnailBox = await page.locator('.p-projects__thumbnail').first().boundingBox()
-    const firstItemBox = await page.locator('.p-projects__item').first().boundingBox()
-    expect(Math.abs((thumbnailBox?.y ?? 0) - (firstItemBox?.y ?? 0))).toBeLessThanOrEqual(1)
+    const viewportHeight = page.viewportSize()?.height ?? 0
+    const thumbnailCenterY = (thumbnailBox?.y ?? 0) + (thumbnailBox?.height ?? 0) / 2
+    expect(Math.abs(thumbnailCenterY - viewportHeight / 2)).toBeLessThanOrEqual(1)
+  })
+
+  test('PC: ホバー時は文字だけを薄くし、サムネイルは薄くしない', async ({ page }) => {
+    test.skip(!isPcViewport(page), 'PC のみの仕様')
+    await page.goto('/projects/')
+    const card = page.locator('.p-projects__card').first()
+    await card.locator('.p-projects__link').hover()
+    await expect(card.locator('.p-projects__title')).toHaveCSS('opacity', '0.5')
+    await expect(card.locator('.p-projects__thumbnail')).toHaveCSS('opacity', '1')
+  })
+
+  test('PC: スクロールし切ると最後の項目が画面の縦中央に来て、プロフィールは動かない', async ({
+    page,
+  }) => {
+    test.skip(!isPcViewport(page), 'PC のみの仕様')
+    // 低い画面でも、固定フッターに隠れた最後の項目までスクロールで見られることを確認する
+    await page.setViewportSize({ width: 1280, height: 720 })
+    await page.goto('/projects/')
+    const profile = page.locator('.p-projects__identity--pc')
+    const profileY = (await profile.boundingBox())?.y ?? 0
+
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+    const lastItemBox = await page.locator('.p-projects__item').last().boundingBox()
+    const footerBox = await page.locator('.js-site-footer').boundingBox()
+    const viewportHeight = page.viewportSize()?.height ?? 0
+    // 最後の項目の下端が画面の縦中央に揃い、フッターより上に出る
+    expect(
+      Math.abs((lastItemBox?.y ?? 0) + (lastItemBox?.height ?? 0) - viewportHeight / 2)
+    ).toBeLessThanOrEqual(1)
+    expect((lastItemBox?.y ?? 0) + (lastItemBox?.height ?? 0)).toBeLessThan(footerBox?.y ?? 0)
+    await expect.poll(async () => (await profile.boundingBox())?.y ?? 0).toBeCloseTo(profileY, 0)
+  })
+
+  test('PC: 一覧の幅はフッターの Contact〜instagram の 1 行に揃う', async ({ page }) => {
+    test.skip(!isPcViewport(page), 'PC のみの仕様')
+    await page.goto('/projects/')
+    await page.evaluate(() => document.fonts.ready)
+    const listBox = await page.locator('.p-projects__list').boundingBox()
+    const contact = await getContactLineEdges(page)
+    expect(Math.abs((listBox?.x ?? 0) - contact.left)).toBeLessThanOrEqual(1)
+    expect(Math.abs((listBox?.x ?? 0) + (listBox?.width ?? 0) - contact.right)).toBeLessThanOrEqual(
+      1
+    )
   })
 
   test('PC: キーボードでフォーカスした項目のサムネイルも表示する', async ({ page }) => {
@@ -201,6 +251,41 @@ test.describe('Project 詳細', () => {
     await openMenuIfCollapsed(page)
     await page.getByRole('link', { name: 'Projects' }).click()
     await expect(page).toHaveURL(/\/projects\/$/)
+  })
+
+  test('フッターの Projects は取り消し線と左矢印で表示する', async ({ page }) => {
+    await openFirstProject(page)
+    await openMenuIfCollapsed(page)
+    const link = page.getByRole('link', { name: 'Projects' })
+    await expect(link.locator('.p-site-footer__label')).toHaveCSS(
+      'text-decoration-line',
+      'line-through'
+    )
+    await expect(link.locator('.p-site-footer__arrow')).toHaveText('←')
+  })
+
+  test('PC: フッターの Contact〜instagram のブロックは写真の左右中央に揃う', async ({ page }) => {
+    test.skip(!isPcViewport(page), 'PC のみの仕様')
+    await openFirstProject(page)
+    const contactBox = await page.locator('.p-site-footer__contact').boundingBox()
+    const imageBox = await page.locator('.p-project__image').first().boundingBox()
+    const centerX = (box: typeof contactBox): number => (box?.x ?? 0) + (box?.width ?? 0) / 2
+    expect(Math.abs(centerX(contactBox) - centerX(imageBox))).toBeLessThanOrEqual(1)
+  })
+
+  test('PC: 1 枚目の写真は画面の縦中央から始まる', async ({ page }) => {
+    test.skip(!isPcViewport(page), 'PC のみの仕様')
+    await openFirstProject(page)
+    const imageBox = await page.locator('.p-project__image').first().boundingBox()
+    const viewportHeight = page.viewportSize()?.height ?? 0
+    const imageCenterY = (imageBox?.y ?? 0) + (imageBox?.height ?? 0) / 2
+    // 上下に --page-block-start（32px 固定）の余白が残らないほど縦長の写真は上端で止めるため、検証しない
+    const pageBlockStartPx = 32
+    test.skip(
+      (imageBox?.height ?? Infinity) > viewportHeight - pageBlockStartPx * 2,
+      '写真が画面に対して縦長すぎる'
+    )
+    expect(Math.abs(imageCenterY - viewportHeight / 2)).toBeLessThanOrEqual(1)
   })
 
   test('言語切り替えで同じプロジェクトの英語版へ移動する', async ({ page }) => {

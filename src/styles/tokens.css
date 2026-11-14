@@ -52,10 +52,17 @@
     --size-text-10: calc(10 * var(--px));
     --size-text-10-12: calc(10 * var(--px) + 2 * var(--fluid));
     --size-text-11: calc(11 * var(--px));
+    --size-text-11-5: calc(11.5 * var(--px));
     --size-text-12-13: calc(12 * var(--px) + 1 * var(--fluid));
     --size-text-12-17: calc(12 * var(--px) + 5 * var(--fluid));
     --size-text-13: calc(13 * var(--px));
     --size-text-15-17: calc(15 * var(--px) + 2 * var(--fluid));
+    /*
+     * フッター（PC）の「Contact → info@katsuakikobayashi.com / instagram」1 行の幅の、
+     * 文字サイズに対する比率（Roboto で実測: 13px で 388.6px）。
+     * 文言・メールアドレス・書体・字間を変えた場合は再計測すること（tests/e2e で幅の一致を検証している）
+     */
+    --ratio-contact-line: 29.89;
     /* 和文本文の字間（SP 10px×0.01em = 0.1px → PC 12px×0.055em ≒ 0.66px） */
     --size-tracking-0-1-0-66: calc(0.1 * var(--px) + 0.56 * var(--fluid));
 
@@ -63,7 +70,7 @@
      * スペーシングのプリミティブ値（min → max: px 相当）
      * ------------------------------------------------------------- */
     --size-space-8: calc(8 * var(--px));
-    --size-space-9: calc(9 * var(--px));
+    --size-space-12: calc(12 * var(--px));
     --size-space-12-14: calc(12 * var(--px) + 2 * var(--fluid));
     --size-space-16: calc(16 * var(--px));
     --size-space-17: calc(17 * var(--px));
@@ -97,10 +104,8 @@
     --grid-content-sp-photo: 82.0669%;
     /* About 写真の幅が第 4 カラムに占める比率 = 300 / 451 */
     --grid-column-4-photo: 66.52%;
-    /* 第 4 カラム右寄せの写真（300px）の幅が第 3 カラム幅に占める比率 = 300 / 375 */
-    --grid-column-3-photo: 80%;
-    /* 第 3 カラム右端からコンテンツ右端（第 4 カラム右端）までの距離の、第 3 カラム幅に対する比率 = 451 / 375 */
-    --grid-column-3-to-end: 120.2667%;
+    /* 第 4 カラム右寄せの写真（300px）の幅がコンテンツ幅（1280px）に占める比率 = 300 / 1280 */
+    --grid-content-photo-ratio: 0.234375;
     /*
      * Project 詳細（PC）: 写真をページ中央に置く独自グリッド。
      * PC: 60 | 475 | 925 | 1030 | 1340(右端) → 415 : 450 : 105 : 310
@@ -117,8 +122,13 @@
     /* ---------------------------------------------------------------
      * ビューポート高さに対する位置
      * ------------------------------------------------------------- */
-    --size-viewport-block-10: 10svh;
     --size-viewport-block-32-4: 32.4svh;
+    --size-viewport-block-50: 50svh;
+
+    /* ---------------------------------------------------------------
+     * 不透明度
+     * ------------------------------------------------------------- */
+    --opacity-50: 0.5;
 
     /* ---------------------------------------------------------------
      * アイコン・操作領域

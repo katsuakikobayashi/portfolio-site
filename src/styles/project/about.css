@@ -27,8 +27,10 @@
       grid-column: 1 / 3;
     }
 
+    /* 文章の幅はフッターの Contact〜instagram の 1 行に揃える（左端は同じ第 3 カラムの左端） */
     .p-about__article {
       grid-column: 3;
+      inline-size: var(--contact-line-inline-size);
     }
 
     .p-about__photo {
@@ -74,8 +76,9 @@
     line-height: var(--line-height-prose);
   }
 
-  /* 和文ページ（html[lang="ja"]）の氏名・本文のみ字間を差し替える */
+  /* 和文ページ（html[lang="ja"]）の氏名・本文のみ文字サイズ・字間を差し替える */
   .p-about__name:lang(ja) {
+    font-size: var(--font-size-about-name-ja);
     letter-spacing: var(--letter-spacing-title-ja);
   }
 

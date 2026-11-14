@@ -14,7 +14,7 @@
     align-items: center;
     /* メニューを開いたとき、背面の本文と重なっても読めるよう地色で塗る */
     background-color: var(--color-bg);
-    font-size: var(--font-size-label);
+    font-size: var(--font-size-footer);
     letter-spacing: var(--letter-spacing-label);
     line-height: var(--line-height-single);
   }
@@ -63,14 +63,18 @@
     text-underline-offset: var(--underline-offset);
   }
 
-  /* 現在のページは取り消し線で非活性であることを示す（デザイン指定） */
-  .p-site-footer__link--current .p-site-footer__label {
+  /*
+   * 現在のページは取り消し線で非活性であることを示す（デザイン指定）。
+   * 親ページ（Project 詳細から見た Projects）も同じく取り消し線にするが、戻る導線としてリンクは残す
+   */
+  .p-site-footer__link--current .p-site-footer__label,
+  .p-site-footer__link--parent .p-site-footer__label {
     text-decoration-line: line-through;
   }
 
   @media (any-hover: hover) {
     a.p-site-footer__link:hover {
-      opacity: 0.6;
+      opacity: var(--opacity-hover);
     }
   }
 
@@ -111,10 +115,6 @@
     display: grid;
     grid-template-columns: subgrid;
     align-items: center;
-  }
-
-  .p-site-footer__copyright {
-    font-size: var(--font-size-copyright-sp);
   }
 
   /* ---------------------------------------------------------------
@@ -234,6 +234,28 @@
       margin-inline: var(--spacing-inline-item);
     }
 
+    /* TOP: 第 3 カラムいっぱいの写真の左右中央に揃える（はみ出す場合も左右均等に伸びる） */
+    .p-site-footer--contact-column-center .p-site-footer__contact {
+      justify-self: center;
+    }
+
+    /*
+     * Project 詳細: 写真カラムの中心はコンテンツ幅の中央（--grid-columns-project 参照）だが、
+     * フッターの 4 カラムグリッドの第 3 カラムの中心とはわずかにずれる。
+     * ナビとブロックをフッター全幅に広げ、全幅の中央に揃える。
+     * 第 4 カラムの言語切り替えはナビと同じ行に重なるが、後に置かれた要素として手前に描画されるため
+     * 操作は妨げない。is-menu-open 付きの指定（SP で開いたまま PC 幅へ広げた場合）にも負けないよう併記する
+     */
+    .p-site-footer--contact-content-center .p-site-footer__nav,
+    .p-site-footer--contact-content-center.is-menu-open .p-site-footer__nav {
+      grid-column: 1 / -1;
+    }
+
+    .p-site-footer--contact-content-center .p-site-footer__contact {
+      grid-column: 1 / -1;
+      justify-self: center;
+    }
+
     .p-site-footer__contact .c-link {
       text-decoration-line: none;
     }
@@ -250,11 +272,6 @@
       display: flex;
       align-items: baseline;
       gap: var(--spacing-inline-group);
-    }
-
-    /* PC では言語切り替えと同じサイズで 1 行に並べる */
-    .p-site-footer__copyright {
-      font-size: inherit;
     }
 
     .p-site-footer__toggle {

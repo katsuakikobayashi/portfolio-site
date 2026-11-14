@@ -143,7 +143,7 @@
 
       --project-media-inline-size: calc(100cqi * var(--project-media-ratio-pc));
       /* プロフィールを画面の縦中央に置いたときの上端。概要の上端もここに揃える（カンプ指定） */
-      --project-sticky-top: calc((100svh - var(--profile-block-size)) / 2);
+      --project-sticky-top: var(--profile-sticky-top);
     }
 
     .p-project__identity--sp {
@@ -168,16 +168,13 @@
     }
 
     /*
-     * 1 枚目の写真は縦中央より少し下（--project-lead-shift）から始め、
+     * 1 枚目の写真はファーストビューで画面の縦中央に置き、
      * 最後の写真はスクロールし切ったときに縦中央に来るよう上下に余白を取る
      */
     .p-project__gallery {
       grid-column: 1;
       grid-row: 1;
-      padding-block: max(
-          var(--page-block-start),
-          (100svh - var(--project-lead-block-size)) / 2 + var(--project-lead-shift)
-        )
+      padding-block: max(var(--page-block-start), (100svh - var(--project-lead-block-size)) / 2)
         max(var(--page-block-start), (100svh - var(--project-last-block-size)) / 2);
     }
 

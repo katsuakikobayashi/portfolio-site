@@ -44,5 +44,11 @@ const [firstImage] = view.images
     paragraphs={view.paragraphs}
     images={view.images}
   />
-  <SiteFooter locale={locale} pathname={Astro.url.pathname} isOverlay />
+  <SiteFooter
+    locale={locale}
+    pathname={Astro.url.pathname}
+    parent="projects"
+    contactAlign="content"
+    isOverlay
+  />
 </BaseLayout>

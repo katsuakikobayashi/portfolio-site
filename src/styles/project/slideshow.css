@@ -21,6 +21,13 @@
   /* 写真全体をリンクの押下範囲にする（<picture> は display: contents のため <img> が直接の中身になる） */
   .p-slideshow__link {
     display: block;
+    transition: opacity var(--duration-normal) var(--ease-out-cubic);
+  }
+
+  @media (any-hover: hover) {
+    .p-slideshow__link:hover {
+      opacity: var(--opacity-hover);
+    }
   }
 
   .p-slideshow__image {

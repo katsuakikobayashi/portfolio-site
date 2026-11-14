@@ -22,13 +22,13 @@
 
   @media (any-hover: hover) {
     .p-profile__home-link:hover {
-      opacity: 0.6;
+      opacity: var(--opacity-hover);
     }
   }
 
   .p-profile__role {
     margin-block-start: var(--spacing-lg);
-    font-size: var(--font-size-label);
+    font-size: var(--font-size-role);
     letter-spacing: var(--letter-spacing-label);
     line-height: var(--line-height-single);
   }

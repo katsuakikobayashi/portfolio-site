@@ -11,6 +11,13 @@
 
   .p-page-header__home {
     color: inherit;
+    transition: opacity var(--duration-normal) var(--ease-out-cubic);
+  }
+
+  @media (any-hover: hover) {
+    .p-page-header__home:hover {
+      opacity: var(--opacity-hover);
+    }
   }
 
   .p-page-header__sep {

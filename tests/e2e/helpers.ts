@@ -37,3 +37,27 @@ export const getLinkHrefAtPoint = (page: Page, x: number, y: number): Promise<st
       document.elementFromPoint(pointX, pointY)?.closest('a')?.getAttribute('href') ?? null,
     [x, y] as const
   )
+
+/** 要素の左右端（ビューポート左端からの X 座標・px） */
+export interface InlineEdges {
+  left: number
+  right: number
+}
+
+/**
+ * @function getContactLineEdges
+ * @description フッターの Contact〜instagram の 1 行の、文字が実際に描かれている範囲の左右端を返す。
+ *              ブロック自体はグリッドのカラム幅に広がるため、中身の文字範囲（Range）で測る
+ * @param {Page} page - 対象ページ
+ * @returns {Promise<InlineEdges>} 1 行の左右端
+ */
+export const getContactLineEdges = (page: Page): Promise<InlineEdges> =>
+  page.evaluate(() => {
+    const range = document.createRange()
+    const contact = document.querySelector('.p-site-footer__contact')
+    if (contact !== null) {
+      range.selectNodeContents(contact)
+    }
+    const { left, right } = range.getBoundingClientRect()
+    return { left, right }
+  })

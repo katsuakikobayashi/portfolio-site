@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { isPcViewport } from './helpers'
+import { getContactLineEdges, isPcViewport } from './helpers'
 
 /**
  * About の氏名・本文・写真は microCMS の内容に依存するため、
@@ -10,6 +10,14 @@ test.describe('About ページ', () => {
     await page.goto('/about/')
     await expect(page.getByRole('heading', { level: 1 })).not.toBeEmpty()
     expect(await page.locator('.p-about__paragraph').count()).toBeGreaterThan(0)
+  })
+
+  test('和文の氏名は 11.5px・字間 0.56em で表示する', async ({ page }) => {
+    await page.goto('/about/')
+    const name = page.locator('.p-about__name')
+    await expect(name).toHaveCSS('font-size', '11.5px')
+    // 0.56em × 11.5px = 6.44px
+    await expect(name).toHaveCSS('letter-spacing', '6.44px')
   })
 
   test('本文の改行は <br> で表現され、HTML としては解釈されない', async ({ page }) => {
@@ -51,6 +59,18 @@ test.describe('About ページ', () => {
 
     await page.mouse.move(0, 0)
     await expect(photo).toHaveCSS('opacity', '0')
+  })
+
+  test('PC: 本文の幅はフッターの Contact〜instagram の 1 行に揃う', async ({ page }) => {
+    test.skip(!isPcViewport(page), 'PC のみの仕様')
+    await page.goto('/about/')
+    await page.evaluate(() => document.fonts.ready)
+    const articleBox = await page.locator('.p-about__article').boundingBox()
+    const contact = await getContactLineEdges(page)
+    expect(Math.abs((articleBox?.x ?? 0) - contact.left)).toBeLessThanOrEqual(1)
+    expect(
+      Math.abs((articleBox?.x ?? 0) + (articleBox?.width ?? 0) - contact.right)
+    ).toBeLessThanOrEqual(1)
   })
 
   test('SP: ページヘッダーを表示し、写真は表示しない', async ({ page }) => {
